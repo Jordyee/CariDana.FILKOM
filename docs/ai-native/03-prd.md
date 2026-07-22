@@ -2,7 +2,8 @@
 
 ## Status
 
-Clarified draft for final project-owner review.
+Approved by the project owner on 2026-07-22. The clarification gate is
+resolved, and the PRD is ready for `project-constitution`.
 
 ## Product
 

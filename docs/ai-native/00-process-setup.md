@@ -18,9 +18,9 @@ mobile-first web application plan.
 
 1. `grill-my-idea`
 2. `idea-to-intent`
-3. `project-constitution`
-4. `intent-to-prd`
-5. `clarify-prd`
+3. `intent-to-prd`
+4. `clarify-prd`
+5. `project-constitution`
 6. `prd-to-architecture`
 7. `architecture-to-issues`
 8. `issue-to-prompt`
@@ -44,6 +44,26 @@ mobile-first web application plan.
 - Prioritize mobile workflows over desktop table convenience.
 - Use real spreadsheet structure as evidence, but avoid exposing sensitive data in final artifacts unless needed.
 
+## GitHub Working Agreement
+
+- Every completed logical change must be committed before the task handoff. A
+  read-only task with no file changes does not require a commit.
+- Do not develop directly on `main`. Start each planning unit or implementation
+  issue from the latest `main` on a dedicated `agent/<short-description>`
+  branch.
+- One independently assignable issue belongs to one branch and one primary
+  owner/agent. Parallel branches are allowed only when their scope and file
+  ownership do not conflict and their dependencies are explicit.
+- Stage only files that belong to the change. Existing unrelated user changes
+  must not be included silently.
+- Run the relevant checks before committing. Push the branch and open a draft
+  pull request for owner review; merge only after applicable constitution
+  quality gates pass.
+- Use concise commits that describe one logical change. Scope changes outside
+  the approved MVP require project-owner approval before implementation.
+
 ## Next Step
 
-Wait for explicit instruction to start `grill-my-idea`.
+Start `project-constitution` from the approved PRD and resolved clarification
+log. Save the reviewed result as `docs/ai-native/14-project-constitution.md`
+before starting architecture.
