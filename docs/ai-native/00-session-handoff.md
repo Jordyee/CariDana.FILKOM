@@ -2,7 +2,7 @@
 
 ## Handoff Status
 
-- Prepared: 2026-07-22
+- Prepared: 2026-07-23
 - Project: CariDana.FILKOM
 - Requirements status: approved
 - Constitution status: approved by the project owner on 2026-07-22
@@ -16,11 +16,12 @@ chat history when the local artifacts already contain them.
 
 ## Required Reading
 
-1. `docs/ai-native/03-prd.md` - approved product requirements and acceptance criteria.
-2. `docs/ai-native/15-clarification-log.md` - resolved ambiguities and downstream checks.
-3. `docs/ai-native/02-intent-brief.md` - product intent and scope boundary.
-4. `docs/ai-native/00-source-inventory.md` - spreadsheet sources and inspection status.
-5. `docs/ai-native/00-process-setup.md` - corrected engineering sequence and guardrails.
+1. `docs/ai-native/14-project-constitution.md` - approved binding principles and quality gates.
+2. `docs/ai-native/03-prd.md` - approved product requirements and acceptance criteria.
+3. `docs/ai-native/15-clarification-log.md` - resolved ambiguities and downstream checks.
+4. `docs/ai-native/02-intent-brief.md` - product intent and scope boundary.
+5. `docs/ai-native/00-source-inventory.md` - spreadsheet sources and inspection status.
+6. `docs/ai-native/00-process-setup.md` - corrected engineering sequence and guardrails.
 
 The earlier grilling record is available at
 `docs/ai-native/01-grill-my-idea.md` if a decision needs its original context.
@@ -138,9 +139,13 @@ Continue with `prd-to-architecture`, then
 ```text
 Lanjutkan proyek CariDana.FILKOM dari workspace ini. Baca terlebih dahulu
 docs/ai-native/00-session-handoff.md beserta required reading yang disebutkan di
-dalamnya. Requirements dan PRD sudah disetujui. Gunakan skill
-project-constitution untuk menyusun
-docs/ai-native/14-project-constitution.md. Jangan mulai coding atau arsitektur.
-Setelah dokumen selesai, berhenti untuk review saya dan jelaskan keputusan yang
-paling penting serta quality gate yang perlu saya setujui.
+dalamnya. Requirements, PRD, dan project constitution sudah disetujui. Gunakan
+skill prd-to-architecture untuk menyusun docs/ai-native/04-architecture.md.
+Arsitektur harus memvalidasi satu full-stack Cloudflare Worker plus D1 terhadap
+local authentication, role authorization, mobile-first UI, Google Sheet sync
+yang idempotent, private Drive evidence workflow, Excel generation, audit
+history, dan batas free tier untuk aktivitas sampai 150 order. Jangan mulai
+coding atau membuat implementation issues. Setelah dokumen selesai, berhenti
+untuk review project owner dan jelaskan keputusan arsitektur, tradeoff, bukti
+kompatibilitas, risiko, serta bagian yang memerlukan persetujuan.
 ```

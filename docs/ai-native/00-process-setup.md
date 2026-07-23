@@ -64,6 +64,6 @@ mobile-first web application plan.
 
 ## Next Step
 
-Start `project-constitution` from the approved PRD and resolved clarification
-log. Save the reviewed result as `docs/ai-native/14-project-constitution.md`
-before starting architecture.
+Start `prd-to-architecture` from the approved PRD and project constitution.
+Save the reviewable architecture as `docs/ai-native/04-architecture.md` and
+stop for project-owner approval before creating issues or starting coding.
