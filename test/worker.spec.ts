@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import { strFromU8, unzipSync } from "fflate";
 import { env, SELF } from "cloudflare:test";
 import { beforeAll, describe, expect, it } from "vitest";
 import { derivePbkdf2 } from "../src/auth";
@@ -44,10 +44,25 @@ describe("synthetic Worker compatibility spike", () => {
   it("generates a downloadable XLSX with all four required groups", async () => {
     const response = await SELF.fetch("https://example.test/api/report-probe.xlsx");
     expect(response.headers.get("Content-Disposition")).toContain("attachment");
-    const workbook = XLSX.read(await response.arrayBuffer(), { type: "array" });
-    expect(workbook.SheetNames).toEqual(["1 Product Target", "2 All Revenue", "3 Problems", "4 Final Decision"]);
-    expect(workbook.Sheets["2 All Revenue"]?.C3?.f).toBe("B2*C2");
-    expect(workbook.Sheets["2 All Revenue"]?.A2?.l?.Target).toContain("example.invalid");
-    expect(workbook.Sheets["2 All Revenue"]?.A7?.v).toBe("Committee Chair");
+    const archive = unzipSync(new Uint8Array(await response.arrayBuffer()));
+    const workbookXml = strFromU8(archive["xl/workbook.xml"]!);
+    const worksheetXml = Object.entries(archive)
+      .filter(([name]) => name.startsWith("xl/worksheets/sheet") && name.endsWith(".xml"))
+      .map(([, bytes]) => strFromU8(bytes))
+      .join("\n");
+    const allXml = Object.values(archive).map((bytes) => strFromU8(bytes)).join("\n");
+
+    expect(workbookXml).toContain('name="1 Product Target"');
+    expect(workbookXml).toContain('name="2 All Revenue"');
+    expect(workbookXml).toContain('name="3 Problems"');
+    expect(workbookXml).toContain('name="4 Final Decision"');
+    expect(worksheetXml).toContain("<f>B2*15000</f>");
+    expect(worksheetXml).toContain("<f>SUM(C2:C2)</f>");
+    expect(worksheetXml).toContain("HYPERLINK");
+    expect(allXml).toContain("https://example.invalid/synthetic-evidence");
+    expect(allXml).toContain("Committee Chair");
+    expect(allXml).toContain("Treasurer");
+    expect(allXml).toContain("FF1F2937");
+    expect(allXml).toContain("[$Rp-421] #,##0");
   });
 });

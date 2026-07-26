@@ -18,7 +18,7 @@ app.post("/api/session-probe", async (context) => {
   return context.json({ ok: true });
 });
 
-app.get("/api/report-probe.xlsx", (context) => new Response(createSyntheticWorkbook(), {
+app.get("/api/report-probe.xlsx", async (context) => new Response(await createSyntheticWorkbook(), {
   headers: {
     "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
     "Content-Disposition": 'attachment; filename="synthetic-compatibility-proof.xlsx"',

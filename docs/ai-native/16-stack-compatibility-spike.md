@@ -8,12 +8,12 @@
 - Architecture gates referenced: **Stack Choice**, **Compatibility and
   Free-Tier Validation** steps 1--3, and the constitution's **Reliability and
   deployment** / **Closure and reports** evidence requirements.
-- Decision: **REVISE BEFORE ACCEPTING THE COMPLETE STACK.** Hono + one Worker
-  + static assets + D1 is a pass for this narrow compatibility proof. The
-  selected `xlsx` package is a fail for production selection: it works
-  technically but has two high-severity advisories with no registry fix.
-  Evaluate a maintained Worker-compatible XLSX writer (or authorized
-  client-side generation from a closed-report DTO) before implementation.
+- Decision: **PASS FOR TECHNICAL COMPATIBILITY; OWNER CONFIRMATION OF THE
+  REPLACEMENT REMAINS.** Hono + one Worker + static assets + D1 passed. The
+  original `xlsx@0.18.5` candidate was rejected and removed because it had two
+  high-severity advisories with no registry fix. `write-excel-file@4.1.1` was
+  selected as the smallest safe candidate found, then passed the same Worker
+  runtime, workbook-structure, build, audit, and deployment proof.
 - No production feature work, real Google Sheet/Drive access, buyer data,
   proof link, or Google credential was used.
 
@@ -38,9 +38,9 @@ The proof code is intentionally small and marked by its synthetic routes:
   `HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=600`; it does **not** claim
   a complete production session or CSRF design.
 - `GET /api/report-probe.xlsx` creates an in-memory workbook and marks it as a
-  download. It contains the four required group headings in order, formula
-  cells, rupiah number formats, a synthetic `example.invalid` hyperlink, and
-  committee-chair/treasurer signature rows.
+  download. It contains the four required group headings in order, dark table
+  headers, formula cells, rupiah number formats, a synthetic `example.invalid`
+  hyperlink formula, and committee-chair/treasurer signature rows.
 
 `migrations/0001_spike_probe.sql` is a checked-in versioned migration. It was
 applied locally and remotely to an empty D1 database dedicated to this spike.
@@ -59,7 +59,8 @@ PBKDF2, and XLSX structure/download.
 | Cloudflare Vitest pool | `0.18.8` |
 | Vitest | `4.1.10` |
 | TypeScript | `7.0.2` |
-| `xlsx` tested | `0.18.5` |
+| XLSX writer accepted by the proof | `write-excel-file` `4.1.1` |
+| ZIP implementation | `fflate` `0.8.2` (the writer's sole runtime dependency) |
 | Generated Worker runtime types | workerd `1.20260722.1` |
 
 `wrangler types` generated `worker-configuration.d.ts`; no binding interface
@@ -73,11 +74,12 @@ all passed.
 | Local migration | Pass: `0001_spike_probe.sql`, 3 SQL commands |
 | Remote migration | Pass: same migration, APAC D1, 0.65 ms reported execution |
 | Worker runtime tests | Pass: 5/5 |
-| PBKDF2-HMAC-SHA-256 | Pass in workerd: 600,000 iterations, 234.00 ms synthetic local benchmark |
-| Build/dry run | Pass: 641.06 KiB total / 145.32 KiB gzip |
-| Deployed Worker startup | 18 ms |
-| Deployed XLSX response | Pass: 200, 11,552 bytes, attachment disposition and XLSX MIME type |
-| Deployed D1 route | Pass: two intentionally created synthetic rows; direct query reported 2 rows read and 0 rows written |
+| PBKDF2-HMAC-SHA-256 | Pass in workerd: 600,000 iterations, 288.00 ms latest synthetic local benchmark |
+| Dependency audit | Pass on 2026-07-26: 0 known vulnerabilities at every severity |
+| Build/dry run | Pass: 224.15 KiB total / 47.80 KiB gzip (down from 641.06 / 145.32 KiB) |
+| Deployed Worker startup | 9 ms |
+| Deployed XLSX response | Pass: 200, 6,040 bytes, attachment disposition and XLSX MIME type |
+| Deployed D1 route | Pass: three intentionally created synthetic rows after final verification |
 | Deployed cookie route | Pass: `HttpOnly`, `Secure`, `SameSite=Lax`, `Path`, and bounded lifetime present |
 
 Deployment was deliberately isolated:
@@ -85,30 +87,34 @@ Deployment was deliberately isolated:
 - Worker: `caridana-stack-compatibility-spike`
 - D1: `caridana-stack-compatibility` (`8021abe9-d02d-43fd-821e-b9470c67dedd`)
 - URL: `https://caridana-stack-compatibility-spike.gerungan-dj.workers.dev`
-- Deployed version: `7b9106fb-e3b2-4d34-8ae9-a397f00392df`
+- Deployed version: `3412ad89-7139-4c29-9202-493a033a8fe0`
 
 ## Risks, limits, and what remains unproven
 
-### First blocking limit
+### Rejected dependency and resolved blocker
 
-`npm audit --json` reports one direct production dependency with two high
-severity advisories and no available registry fix: `xlsx@0.18.5` is affected by
-prototype pollution (GHSA-4r6h-8v6p-xvw6) and ReDoS
-(GHSA-5pgg-2g8v-p4x9). The current package is therefore proof-only and must
-not become the production export implementation. This is the first limit that
-forces a stack revision, limited to the XLSX library/placement as anticipated
-by the architecture.
+The original audit reported two high-severity advisories with no available
+registry fix: `xlsx@0.18.5` was affected by prototype pollution
+(GHSA-4r6h-8v6p-xvw6) and ReDoS (GHSA-5pgg-2g8v-p4x9). That package is now
+absent from both `package.json` and the lockfile. The replacement
+`write-excel-file@4.1.1` was published in June 2026, has one runtime dependency,
+and produced an audit result of zero known vulnerabilities on 2026-07-26.
 
-The 234 ms PBKDF2 number is a local workerd measurement, not a production CPU
+An audit result is a point-in-time check, not a permanent guarantee. Dependency
+audit must remain part of implementation CI/release review, and any later high
+or critical advisory must be reported to the project owner rather than silently
+accepted.
+
+The 288 ms PBKDF2 number is a local workerd measurement, not a production CPU
 budget guarantee. It supports Web Crypto compatibility only. Re-benchmark the
 chosen hash parameters after deploying the final auth flow, and enforce the
 PRD's persistent failure counter, delay, lockout, session storage, revocation,
 and CSRF control. The cookie proof does not substitute for them.
 
-The 641.06 KiB dry-run bundle is acceptable as a small spike but confirms that
-the XLSX package dominates the Worker bundle. The XLSX generation route keeps
-the whole workbook in memory, so it is appropriate only for the explicitly
-small report proof; final 150-order workbook measurements remain required.
+The replacement reduced the dry-run bundle by about 65% uncompressed and 67%
+gzip. The XLSX generation route still keeps the whole workbook in memory, so it
+is appropriate only for the explicitly small report proof; final 150-order
+workbook measurements remain required.
 
 This spike does not prove representative 150-order p95 latency or complete D1
 row-read/write quota use, three-pass duplicate-Sheet synchronization, Drive
@@ -116,13 +122,16 @@ ACLs, five-role authorization, browser/mobile accessibility, Treasurer report
 layout approval, complete server session security, or real Excel desktop
 opening. Those are deliberately retained as later architecture/constitution
 gates. Free-plan capacity therefore remains plausible but unaccepted: this
-proof used one request per endpoint and only two synthetic D1 rows.
+proof used one request per endpoint and only three synthetic D1 rows.
 
-## Required owner approval
+## Owner review record and remaining approval
 
-1. Approve replacing/evaluating the XLSX library without adding a second
-   backend by default.
-2. Review this spike result and explicitly accept or amend the revised export
-   direction before `architecture-to-issues` or product feature coding begins.
-3. Keep the later 150-order, duplicate-Sheet, Drive ACL, authorization, and
-   Treasurer-layout gates mandatory.
+On 2026-07-26, the project owner accepted the Hono/Worker/D1 evidence, rejected
+high-risk dependencies, authorized selection of the best safer XLSX
+alternative, confirmed the spike scope, and asked to be notified about future
+security risks. This authorization produced the tested replacement above.
+
+Before `architecture-to-issues`, the owner only needs to confirm that the
+replacement result is accepted as the final stack choice. The later 150-order,
+duplicate-Sheet, Drive ACL, five-role authorization, full session security, and
+Treasurer-layout gates remain mandatory and are not waived by this proof.

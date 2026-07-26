@@ -1,26 +1,63 @@
-import * as XLSX from "xlsx";
+import writeExcelFile, { type CellObject, type SheetData } from "write-excel-file/universal";
 
-export function createSyntheticWorkbook(): Uint8Array {
-  const workbook = XLSX.utils.book_new();
-  const groups: Array<[string, (string | number)[][]]> = [
-    ["1 Product Target", [["Product", "Synthetic Nasi Jaha"], ["Unit price", 15000], ["Target quantity", 10]]],
-    ["2 All Revenue", [["Order ID", "Quantity", "Amount"], ["SYN-001", 2, 30000], ["Total", "", 0]]],
-    ["3 Problems", [["Problem", "Amount"], ["Synthetic packaging loss", 5000]]],
-    ["4 Final Decision", [["Metric", "Value"], ["Recognized revenue", 0], ["Approved loss", 5000], ["Decision", "Synthetic proof only"]]],
+const rupiahFormat = '[$Rp-421] #,##0';
+
+function header(value: string): CellObject {
+  return {
+    value,
+    type: String,
+    fontWeight: "bold",
+    backgroundColor: "#1F2937",
+    textColor: "#FFFFFF",
+  };
+}
+
+function rupiah(value: number): CellObject {
+  return { value, type: Number, format: rupiahFormat };
+}
+
+function formula(value: string, format?: string): CellObject {
+  return { value, type: "Formula", format };
+}
+
+export async function createSyntheticWorkbook(): Promise<ArrayBuffer> {
+  const product: SheetData = [
+    [header("Product"), header("Unit price"), header("Target quantity")],
+    ["Synthetic Nasi Jaha", rupiah(15_000), 10],
   ];
 
-  for (const [name, rows] of groups) {
-    const sheet = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(workbook, sheet, name);
-  }
+  const revenue: SheetData = [
+    [header("Order ID"), header("Quantity"), header("Amount"), header("Evidence")],
+    [
+      "SYN-001",
+      2,
+      formula("B2*15000", rupiahFormat),
+      formula('HYPERLINK("https://example.invalid/synthetic-evidence", "Synthetic evidence")'),
+    ],
+    ["Total", null, formula("SUM(C2:C2)", rupiahFormat), null],
+  ];
 
-  const revenue = workbook.Sheets["2 All Revenue"]!;
-  revenue.C3 = { f: "B2*C2", t: "n", v: 30000, z: '[$Rp-421] #,##0' };
-  revenue.C4 = { f: "SUM(C2:C3)", t: "n", v: 60000, z: '[$Rp-421] #,##0' };
-  revenue.A2 = { t: "s", v: "SYN-001", l: { Target: "https://example.invalid/synthetic-evidence" } };
-  XLSX.utils.sheet_add_aoa(revenue, [["Committee Chair", "________________"], ["Treasurer", "________________"]], { origin: "A7" });
+  const problems: SheetData = [
+    [header("Problem"), header("Amount"), header("Notes")],
+    ["Synthetic packaging loss", rupiah(5_000), "Synthetic fixture only"],
+  ];
 
-  const finalDecision = workbook.Sheets["4 Final Decision"]!;
-  finalDecision.B2 = { f: "'2 All Revenue'!C4", t: "n", v: 60000, z: '[$Rp-421] #,##0' };
-  return XLSX.write(workbook, { type: "array", bookType: "xlsx", compression: true });
+  const finalDecision: SheetData = [
+    [header("Metric"), header("Value")],
+    ["Recognized revenue", formula("'2 All Revenue'!C3", rupiahFormat)],
+    ["Approved loss", rupiah(5_000)],
+    ["Decision", "Synthetic proof only"],
+    [null, null],
+    ["Committee Chair", "________________"],
+    ["Treasurer", "________________"],
+  ];
+
+  const workbook = await writeExcelFile([
+    { data: product, sheet: "1 Product Target", columns: [{ width: 24 }, { width: 16 }, { width: 18 }], stickyRowsCount: 1 },
+    { data: revenue, sheet: "2 All Revenue", columns: [{ width: 16 }, { width: 12 }, { width: 16 }, { width: 24 }], stickyRowsCount: 1 },
+    { data: problems, sheet: "3 Problems", columns: [{ width: 28 }, { width: 16 }, { width: 24 }], stickyRowsCount: 1 },
+    { data: finalDecision, sheet: "4 Final Decision", columns: [{ width: 24 }, { width: 24 }], stickyRowsCount: 1 },
+  ], { fontFamily: "Calibri", fontSize: 11 }).toBlob();
+
+  return workbook.arrayBuffer();
 }
