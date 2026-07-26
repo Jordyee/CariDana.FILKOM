@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "caridana-stack-compatibility-spike",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-07-26",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": { "directory": "./public", "binding": "ASSETS" },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "caridana-stack-compatibility",
+      "database_id": "8021abe9-d02d-43fd-821e-b9470c67dedd",
+      "migrations_dir": "./migrations"
+    }
+  ]
+}

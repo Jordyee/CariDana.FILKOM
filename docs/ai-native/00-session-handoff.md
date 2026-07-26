@@ -2,12 +2,14 @@
 
 ## Handoff Status
 
-- Prepared: 2026-07-23
+- Updated: 2026-07-26
 - Project: CariDana.FILKOM
 - Requirements status: approved
 - Constitution status: approved by the project owner on 2026-07-22
-- Current phase: spec-driven foundation complete; architecture not started
-- Exact next skill: `prd-to-architecture`
+- Architecture status: approved by the project owner on 2026-07-26
+- Stack status: compatibility proof passed and final stack accepted on 2026-07-26
+- Current phase: implementation-issue planning authorized; coding not started
+- Exact next skill: `architecture-to-issues`
 - Coding status: not started intentionally
 
 This file is the entry point for a fresh Codex task. Read it first, then read
@@ -119,33 +121,38 @@ details into source control.
 - Verify private Google Drive permissions and role-specific evidence access.
 - Obtain Treasurer approval of the generated workbook layout.
 - Add authorization tests for all five roles.
-- Produce a minimal framework proof during architecture.
+- Re-run the accepted stack proof if a selected package, compatibility date, or
+  Cloudflare runtime constraint changes materially.
 
 These are validation tasks, not unresolved product requirements.
 
 ## Exact Next Action
 
-1. Read the approved `docs/ai-native/14-project-constitution.md`.
-2. Load and follow `prd-to-architecture`.
-3. Validate the architecture against every binding principle and quality gate.
-4. Do not begin implementation during the architecture stage.
+1. Read all Required Reading above plus
+   `docs/ai-native/16-stack-compatibility-spike.md`.
+2. Load and follow `architecture-to-issues`.
+3. Create or update only `docs/ai-native/05-issues.md` and the corresponding
+   implementation issues.
+4. Preserve every remaining validation/release gate and do not begin feature
+   implementation.
 
-Continue with `prd-to-architecture`, then
-`architecture-to-issues`, `issue-to-prompt`, `run-the-loop`, `test-the-app`,
+After project-owner review of the implementation issues, continue one issue at
+a time with `issue-to-prompt`, `run-the-loop`, `test-the-app`,
 `review-the-code`, and `demo-ready`.
 
 ## Starter Prompt For A New Task
 
 ```text
-Lanjutkan proyek CariDana.FILKOM dari workspace ini. Baca terlebih dahulu
-docs/ai-native/00-session-handoff.md beserta required reading yang disebutkan di
-dalamnya. Requirements, PRD, dan project constitution sudah disetujui. Gunakan
-skill prd-to-architecture untuk menyusun docs/ai-native/04-architecture.md.
-Arsitektur harus memvalidasi satu full-stack Cloudflare Worker plus D1 terhadap
-local authentication, role authorization, mobile-first UI, Google Sheet sync
-yang idempotent, private Drive evidence workflow, Excel generation, audit
-history, dan batas free tier untuk aktivitas sampai 150 order. Jangan mulai
-coding atau membuat implementation issues. Setelah dokumen selesai, berhenti
-untuk review project owner dan jelaskan keputusan arsitektur, tradeoff, bukti
-kompatibilitas, risiko, serta bagian yang memerlukan persetujuan.
+Lanjutkan proyek CariDana.FILKOM sebagai task perencanaan issue terpisah.
+Artifact lokal di branch main adalah sumber keputusan utama; jangan mengandalkan
+chat lain. Baca docs/ai-native/00-session-handoff.md, semua Required Reading,
+docs/ai-native/04-architecture.md, dan
+docs/ai-native/16-stack-compatibility-spike.md secara penuh. Requirements,
+constitution, architecture, dan final stack sudah disetujui project owner.
+Gunakan skill architecture-to-issues untuk membuat atau memperbarui
+docs/ai-native/05-issues.md serta issue implementasi yang kecil, berurutan,
+terlacak ke requirement, dan memiliki acceptance criteria serta verification.
+Pertahankan seluruh validation/release gate yang belum dibuktikan. Jangan
+menulis fitur, menggunakan data nyata, atau melakukan deployment produksi.
+Berhenti untuk review project owner setelah issue plan selesai.
 ```
