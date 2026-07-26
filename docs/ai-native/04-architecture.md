@@ -2,11 +2,13 @@
 
 ## Status and Scope
 
-Draft for project-owner review on 2026-07-23. This plan designs the approved
-MVP only: one product and one mode per activity, manual Google Forms import,
-independent operational/financial states, audit, closure, and Excel export.
-It does not authorize coding, a production Sheet write, a Drive integration,
-or issue creation.
+Approved by the project owner on 2026-07-26, with final stack acceptance
+conditional on the narrow compatibility proof defined below. This plan designs
+the approved MVP only: one product and one mode per activity, manual Google
+Forms import, independent operational/financial states, audit, closure, and
+Excel export. The approval authorizes a time-boxed technical compatibility
+spike using sanitized data, but not feature implementation, a production Sheet
+write, a Drive integration, or implementation-issue creation.
 
 The approved constitution is binding. No conflict was found between it and the
 PRD/clarification log. In particular, a convenient single `status` field, a
@@ -60,8 +62,9 @@ documents Cloudflare Worker deployment, static assets, typed bindings, and
 Worker-pool testing. It is a routing convenience, not the source of security or
 business rules. The browser client has no privileged database or Google token.
 
-**Not yet accepted as an implementation stack.** Before coding begins, a
-minimal, sanitized compatibility proof must build and deploy the candidate,
+**Conditionally approved; not yet accepted as the final implementation
+stack.** Before feature coding begins, a minimal, sanitized compatibility proof
+must build and deploy the candidate,
 exercise a D1 binding and a cookie response, bundle/generate/download a small
 four-section `.xlsx`, and run in the Worker test runtime. Record package
 versions, compatibility date, bundle size, build output, and test results in
@@ -118,7 +121,7 @@ an authorized closed-report DTO); do not add a second backend by default.
 
 | Entity | Essential fields | Relationships / validation |
 | --- | --- | --- |
-| `accounts` | id, username unique, role, password_hash/salt/parameters, active, must_change_password, failure_count, locked_until | One individual local account; no plaintext credential; Coordinator-only admin by default |
+| `accounts` | id, username unique, role, password_hash/salt/parameters, active, must_change_password, failure_count, locked_until | One individual local account; no plaintext credential; Coordinator and Deputy may administer accounts |
 | `sessions` | id, account_id, token_hash, created/expires/revoked timestamps | Cookie token is random; revoke on logout, deactivation, reset, and invalidation |
 | `committee_members` / `divisions` | id, display name, division_id, active | Separate from accounts so attribution does not create access |
 | `activities` | id, product, mode, integer unit prices, target_qty, period, status | Exactly one product; campus pickup configuration XOR regional area/PIC configuration |
@@ -151,7 +154,7 @@ full scans; Cloudflare notes indexes reduce D1 rows read.
 
 ## Key Routes / Screens
 
-- Sign-in and forced password-change screen; Coordinator account/committee
+- Sign-in and forced password-change screen; Coordinator/Deputy account and committee
   administration.
 - Activity list/dashboard; compact cards and drill-down rather than desktop
   spreadsheet tables.
@@ -272,14 +275,31 @@ checks remain explicit acceptance evidence rather than mocked claims.
    while recognizing that app roles cannot replace Drive ACL review.
 7. **No realtime sync, no new storage service, no P2 draft by default** — keeps
    the MVP within the constitution and the free-tier operating model.
+8. **Simple extension seams, not a generic rules engine** — authorization,
+   state transitions, calculations, closure blockers, and export shaping remain
+   separate tested modules. Later approved rules can be added through an
+   artifact amendment, focused module change, tests, and a versioned migration
+   when data changes; current MVP behaviour is not weakened for hypothetical
+   future requirements.
 
-## Owner Review / Required Approvals
+## Owner Review and Remaining Validation
 
-No product decision is open. Before implementation, the project owner must
-approve this architecture and the framework proof results. The later release
-gates still require: controlled duplicate-Sheet authorization before real writes;
-definition/removal of `Column 1`; private Drive permission review; Treasurer
-approval of workbook layout; all-five-role authorization evidence; and the
+On 2026-07-26, the project owner approved the workflow, five-role boundary, MVP
+scope, financial/audit rules, privacy approach, and proposed report direction.
+The owner explicitly enabled account administration for both Coordinator and
+Deputy, requested that later approved rules remain easy to add, and authorized
+the recommended narrow technical compatibility spike. The architecture is
+therefore approved; the Worker/Hono/D1/XLSX stack remains conditional until the
+proof results are reviewed.
+
+The later validation and release gates still require: controlled
+duplicate-Sheet authorization before real writes; definition/removal of
+`Column 1`; private Drive permission review; Treasurer approval of workbook
+layout; all-five-role authorization evidence; and the
 Cloudflare/framework/free-tier proof. If the proof finds an incompatible Excel
 library, CPU budget, or quota threshold, report it to the owner and revise this
 plan before implementation rather than silently expanding infrastructure.
+
+The next authorized action is the sanitized compatibility spike. Do not run
+`architecture-to-issues` until its evidence is recorded and the final stack is
+confirmed.
