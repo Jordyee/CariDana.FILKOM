@@ -8,8 +8,8 @@
 - Architecture gates referenced: **Stack Choice**, **Compatibility and
   Free-Tier Validation** steps 1--3, and the constitution's **Reliability and
   deployment** / **Closure and reports** evidence requirements.
-- Decision: **PASS FOR TECHNICAL COMPATIBILITY; OWNER CONFIRMATION OF THE
-  REPLACEMENT REMAINS.** Hono + one Worker + static assets + D1 passed. The
+- Decision: **PASS; FINAL STACK ACCEPTED BY THE PROJECT OWNER ON 2026-07-26.**
+  Hono + one Worker + static assets + D1 passed. The
   original `xlsx@0.18.5` candidate was rejected and removed because it had two
   high-severity advisories with no registry fix. `write-excel-file@4.1.1` was
   selected as the smallest safe candidate found, then passed the same Worker
@@ -124,14 +124,16 @@ opening. Those are deliberately retained as later architecture/constitution
 gates. Free-plan capacity therefore remains plausible but unaccepted: this
 proof used one request per endpoint and only three synthetic D1 rows.
 
-## Owner review record and remaining approval
+## Owner review record and remaining gates
 
 On 2026-07-26, the project owner accepted the Hono/Worker/D1 evidence, rejected
 high-risk dependencies, authorized selection of the best safer XLSX
 alternative, confirmed the spike scope, and asked to be notified about future
-security risks. This authorization produced the tested replacement above.
+security risks. This authorization produced the tested replacement above. After
+reviewing that result, the owner accepted `write-excel-file@4.1.1` as the final
+XLSX choice and authorized the project to proceed to `architecture-to-issues`.
 
-Before `architecture-to-issues`, the owner only needs to confirm that the
-replacement result is accepted as the final stack choice. The later 150-order,
-duplicate-Sheet, Drive ACL, five-role authorization, full session security, and
-Treasurer-layout gates remain mandatory and are not waived by this proof.
+No further stack confirmation is required before issue planning. The later
+150-order, duplicate-Sheet, Drive ACL, five-role authorization, full session
+security, and Treasurer-layout gates remain mandatory and are not waived by
+this proof.

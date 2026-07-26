@@ -2,13 +2,13 @@
 
 ## Status and Scope
 
-Approved by the project owner on 2026-07-26, with final stack acceptance
-conditional on the narrow compatibility proof defined below. This plan designs
-the approved MVP only: one product and one mode per activity, manual Google
-Forms import, independent operational/financial states, audit, closure, and
-Excel export. The approval authorizes a time-boxed technical compatibility
-spike using sanitized data, but not feature implementation, a production Sheet
-write, a Drive integration, or implementation-issue creation.
+Approved by the project owner on 2026-07-26. The final TypeScript + Hono + one
+Cloudflare Worker + D1 + `write-excel-file@4.1.1` stack was accepted on the same
+date after the sanitized compatibility proof passed. This plan designs the
+approved MVP only: one product and one mode per activity, manual Google Forms
+import, independent operational/financial states, audit, closure, and Excel
+export. Stack acceptance authorizes implementation-issue planning, but not
+feature implementation, a production Sheet write, or a Drive integration.
 
 The approved constitution is binding. No conflict was found between it and the
 PRD/clarification log. In particular, a convenient single `status` field, a
@@ -62,15 +62,14 @@ documents Cloudflare Worker deployment, static assets, typed bindings, and
 Worker-pool testing. It is a routing convenience, not the source of security or
 business rules. The browser client has no privileged database or Google token.
 
-**Conditionally approved; not yet accepted as the final implementation
-stack.** Before feature coding begins, a minimal, sanitized compatibility proof
-must build and deploy the candidate,
-exercise a D1 binding and a cookie response, bundle/generate/download a small
-four-section `.xlsx`, and run in the Worker test runtime. Record package
-versions, compatibility date, bundle size, build output, and test results in
-the future implementation evidence. If the Excel library requires unavailable
-Node APIs, replace only that library (or generate the workbook client-side from
-an authorized closed-report DTO); do not add a second backend by default.
+**Accepted as the final implementation stack on 2026-07-26.** The required
+minimal, sanitized compatibility proof built and deployed the candidate,
+exercised a D1 binding and cookie response, bundled/generated/downloaded a small
+four-section `.xlsx`, and ran in the Worker test runtime. Package versions,
+compatibility date, bundle size, build output, tests, and the XLSX dependency
+replacement are recorded in `docs/ai-native/16-stack-compatibility-spike.md`.
+This acceptance does not waive the representative load, authorization,
+external-system, privacy, or report-layout gates below.
 
 ## System Parts
 
@@ -218,8 +217,10 @@ if the design keeps list queries indexed and sync is manual, but compatibility
 must be measured—not asserted—because every update and index also writes rows.
 Free limits reset at 00:00 UTC; when exceeded, D1 queries fail until reset.
 
-Before accepting the candidate stack or deploying, run this evidence plan using
-only sanitized fixtures:
+Run this evidence plan using only sanitized fixtures. The stack spike recorded
+steps 1 and 3 plus the local Worker-compatibility benchmark portion of step 2 in
+`docs/ai-native/16-stack-compatibility-spike.md`. The deployed login CPU/lock
+subcheck in step 2 and steps 4--6 remain implementation/release gates:
 
 1. Build and deploy a minimal Hono + static-assets Worker with D1; prove one
    D1 read/write, secure cookie header, static route, API route, and Worker test
@@ -289,17 +290,19 @@ scope, financial/audit rules, privacy approach, and proposed report direction.
 The owner explicitly enabled account administration for both Coordinator and
 Deputy, requested that later approved rules remain easy to add, and authorized
 the recommended narrow technical compatibility spike. The architecture is
-therefore approved; the Worker/Hono/D1/XLSX stack remains conditional until the
-proof results are reviewed.
+therefore approved. The compatibility proof subsequently passed, the unsafe
+original XLSX candidate was removed, and the owner accepted
+`write-excel-file@4.1.1` as the final replacement on 2026-07-26.
 
 The later validation and release gates still require: controlled
 duplicate-Sheet authorization before real writes; definition/removal of
 `Column 1`; private Drive permission review; Treasurer approval of workbook
-layout; all-five-role authorization evidence; and the
-Cloudflare/framework/free-tier proof. If the proof finds an incompatible Excel
-library, CPU budget, or quota threshold, report it to the owner and revise this
-plan before implementation rather than silently expanding infrastructure.
+layout; all-five-role authorization evidence; and representative 150-order
+performance plus free-tier quota evidence. If later validation finds an
+incompatible package update, CPU budget, or quota threshold, report it to the
+owner and revise this plan rather than silently expanding infrastructure.
 
-The next authorized action is the sanitized compatibility spike. Do not run
-`architecture-to-issues` until its evidence is recorded and the final stack is
-confirmed.
+The compatibility evidence is recorded in
+`docs/ai-native/16-stack-compatibility-spike.md`, and the final stack is
+confirmed. The next authorized action is `architecture-to-issues`; it must
+produce issue planning only and must not begin feature implementation.
