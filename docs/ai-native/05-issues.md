@@ -2,14 +2,17 @@
 
 ## Status
 
-Draft for project-owner review. This backlog was prepared from the approved
-requirements, constitution, architecture, and final stack. It does not authorize
-feature implementation, production deployment, a real Google Sheet write, or
-access to real buyer data, proof links, or Drive ACLs.
+T001-T039 were approved by the project owner on 2026-09-02 as the complete P1
+learning/reference backlog. This amendment aligns those same Task IDs with the
+approved campus-first sequence, safe manual order intake, Bahasa Indonesia UI,
+and WITA operational time. T040 remains deferred and is not authorized. The
+amendment requires a brief owner review before implementation begins and does
+not authorize production deployment, a real Google Sheet write, or access to
+real buyer data, proof links, or Drive ACLs.
 
-Individual GitHub issues must not be published from this backlog until the
-project owner accepts this artifact. After acceptance, publish only the approved
-tasks and preserve their Task IDs, dependencies, scope, and gates.
+Individual GitHub issues must not be published from the amended backlog until
+the project owner accepts this version. After acceptance, publish only T001-T039
+and preserve their Task IDs, dependencies, scope, and gates.
 
 ## Sources Read
 
@@ -27,10 +30,20 @@ tasks and preserve their Task IDs, dependencies, scope, and gates.
 
 ## Approved Baseline and Scope Rules
 
-- Final stack: TypeScript, Hono, one Cloudflare Worker with static assets, D1,
-  and `write-excel-file@4.1.1`.
-- The application is authoritative after import. The Google Sheet remains an
-  intake source and `Order ID` ledger, not a later update source.
+- Final stack: TypeScript, Hono, one Cloudflare Worker with a Vite-built static
+  client, D1, and `write-excel-file@4.1.1`.
+- D1 is authoritative when an order is created manually or imported. Every
+  order has an immutable internal ID and explicit `manual` or `form_sync`
+  source type. A manual order never requires or fabricates a Sheet identity.
+- Google Form is the preferred intake when practical, but direct manual order
+  entry is valid for authorized campus work. A possible later Form/manual match
+  is never auto-merged: Coordinator/Deputy explicitly links it or imports it as
+  separate, and the decision is audited.
+- Delivery is campus-first. The complete manual campus order-to-close loop is
+  proven before regional-specific work. Regional remains mandatory P1 work
+  before final release.
+- The primary MVP UI language is Bahasa Indonesia. Operational time is shown in
+  WITA (`Asia/Makassar`); stored audit timestamps remain unambiguous.
 - Order, payment, fulfillment, and remittance are independent state axes.
 - All money uses integer rupiah. Confirmed or financial records are corrected
   or voided with audit history, never silently deleted.
@@ -53,7 +66,7 @@ The following tasks are proof gates, not optional documentation:
 | T012 deployed login CPU/lock proof | Account administration and all protected product flows |
 | T024 private Drive ACL/proof-link proof | Workbook evidence links and final report lifecycle |
 | T025 duplicate-Sheet and `Column 1` readiness | Any external Sheet integration |
-| T028 three-pass sanitized duplicate-Sheet proof | Dashboard-to-closure implementation and every real-Sheet write |
+| T028 three-pass sanitized duplicate-Sheet proof | Sheet-backed intake, any real-Sheet write decision, and final P1 release; it does not block the manual campus loop |
 | T032 Treasurer workbook-layout approval | Final report generation/download lifecycle |
 | T034 full five-role authorization/privacy proof | Release validation |
 | T035 mobile/accessibility proof | Release validation |
@@ -70,11 +83,15 @@ security parameters, privacy boundary, or product scope.
 
 1. **Foundation and data boundaries:** T001-T007.
 2. **Authentication and authorization:** T008-T012.
-3. **Controlled setup and operational core:** T013-T023.
-4. **External-system gates and Sheet sync:** T024-T028.
-5. **Dashboard, closure, and reporting:** T029-T033.
-6. **Cross-cutting release proof:** T034-T039.
-7. **Optional P2 work, only after separate approval:** T040.
+3. **Controlled setup and campus operational core:** T013-T019.
+4. **Complete the campus accounting-to-report loop:** T021-T024 and T029-T033.
+5. **Regional P1 expansion after campus-loop evidence:** T020.
+6. **Sheet-backed intake, once its human-owned target is ready:** T025-T028.
+   These tasks may proceed earlier when their dependencies and owner inputs are
+   ready, but waiting for them does not stop dependency-ready manual campus work.
+7. **Cross-cutting release proof after campus, regional, and Sheet work:**
+   T034-T039.
+8. **Optional P2 work, only after separate approval:** T040.
 
 Tasks marked parallelizable may run concurrently only after all dependencies
 pass and only when their listed files do not overlap.
@@ -91,7 +108,8 @@ accepted pinned stack and clearly isolating the throwaway spike behavior.
 **Depends on:** None
 **Likely Files:** `package.json`, `package-lock.json`, `wrangler.jsonc`,
 `tsconfig.json`, `src/index.ts`, `src/app.ts`, `src/env.ts`, `public/`,
-`test/worker.spec.ts`, `.github/workflows/ci.yml`
+`vite.config.ts`, `src/client/`, `test/worker.spec.ts`,
+`.github/workflows/ci.yml`
 
 **Acceptance Criteria:**
 
@@ -100,6 +118,8 @@ accepted pinned stack and clearly isolating the throwaway spike behavior.
 - Hono, Wrangler, TypeScript, the Worker test pool, and
   `write-excel-file@4.1.1` remain pinned to the accepted versions unless an
   owner-reviewed spike amendment is recorded.
+- Vite builds a static client with no SSR or second application server; its
+  selected version is pinned and its output is served by the same Worker.
 - Synthetic probe routes and the isolated spike D1 identifiers cannot be
   exposed by a production configuration.
 - CI commands cover type checking, Worker-runtime tests, dry-run build, lockfile
@@ -249,8 +269,11 @@ independent state histories without denormalizing them into one status.
 
 **Acceptance Criteria:**
 
-- `orders.order_id` is unique and immutable by application contract; imported
-  source identity is unique within its Sheet/tab connection.
+- `orders.order_id` is unique and immutable by application contract, and every
+  order records a constrained `manual` or `form_sync` source type.
+- A manual order has no required Sheet connection or source-row identity and no
+  schema default may fabricate one. Imported source uniqueness is represented
+  through the Sheet link ledger added by T007.
 - Order, payment, fulfillment, and remittance histories use separate tables
   with constrained state values, actor, and timestamp.
 - Collected and remitted amounts are integer rupiah fields and do not infer
@@ -327,9 +350,13 @@ report metadata without storing external proof binaries or workbook blobs.
 - Sheet connections store Sheet/tab identity and mapping version but no client
   credential.
 - Sync runs and row outcomes retain preview/commit state, source row identity,
-  imported/skipped/failed outcome, reason, and linked Order ID.
+  imported/linked/skipped/failed outcome, possible manual candidate, explicit
+  reviewer decision, actor/time, reason, and selected Order ID.
+- A Sheet-order link ledger uniquely binds one committed source identity to one
+  selected Order ID. It may reference a new `form_sync` order or an explicitly
+  reviewed existing `manual` order.
 - A uniqueness rule prevents a committed source identity from creating a second
-  order after partial failure or write-back retry.
+  order or link after partial failure or write-back retry.
 - Report versions store closed activity reference, generator/template version,
   checksum, creator, and timestamp; no workbook/proof blob is stored in D1.
 - Required indexes support row retry, run result, and closed-report lookup.
@@ -668,6 +695,9 @@ campus or regional activity.
   and prevents duplicate submission.
 - The planning summary clearly separates revenue, capital, added costs, and
   planned profit.
+- User-facing labels and validation are primarily Bahasa Indonesia; displayed
+  operational dates/times use WITA while persisted timestamps remain suitable
+  for unambiguous audit.
 
 **Verification:**
 
@@ -675,25 +705,39 @@ campus or regional activity.
 - Manually complete campus and regional setup at 360x800 and 390x844.
 
 **AI Can Help With:** Build the service, routes, mobile forms, and tests.
-**Student Must Judge:** Whether the setup sequence and planning summary are
-understandable to Coordinator/Deputy users.
+**Student Must Judge:** Which fields remain editable after activation when this
+task is reached, and whether the setup sequence and planning summary are
+understandable to Coordinator/Deputy users. Do not guess the unresolved
+post-activation mutation policy.
 **Risk Level:** Medium
 
-## Issue 17: Implement independent order-state mutation services
+## Issue 17: Implement manual-order and independent-state command services
 
 **Task ID:** T017
 **User Story:** US-005, US-006, US-007
-**Requirement IDs:** FR-024-FR-031, NFR-010-NFR-012, SC-003, AC-004
+**Requirement IDs:** FR-019, FR-024-FR-031, NFR-010-NFR-012, SC-002,
+SC-003, AC-004
 **Priority:** P1
 **Parallelizable:** No
-**Goal:** Provide transaction-safe, idempotent mutations for each independent
-order, payment, fulfillment, and remittance axis.
-**Depends on:** T005, T006, T011, T012
-**Likely Files:** `src/domain/order-states.ts`, `src/services/orders.ts`,
-`src/routes/order-states.ts`, `test/orders/state-transitions.spec.ts`
+**Goal:** Provide transaction-safe, idempotent commands for manual order
+creation and each independent order, payment, fulfillment, and remittance axis.
+**Depends on:** T005, T006, T011, T012, T014, T016
+**Likely Files:** `src/domain/order-states.ts`,
+`src/services/manual-orders.ts`, `src/services/orders.ts`,
+`src/routes/orders.ts`, `src/routes/order-states.ts`,
+`test/orders/manual-order.spec.ts`, `test/orders/state-transitions.spec.ts`
 
 **Acceptance Criteria:**
 
+- Coordinator/Deputy or an assigned Member/PIC can create a manual order only
+  for a permitted active activity; forbidden scope and closed/inactive activity
+  requests fail before any write.
+- Manual creation assigns one immutable Order ID, records source type `manual`,
+  actor/time, and consumes an idempotency key without creating or writing any
+  Sheet identity.
+- A conservative same-activity lookup returns potential-match warnings for
+  operator review but never rejects, links, or merges a valid manual order by
+  inference alone.
 - Each endpoint changes exactly one declared axis and appends actor/time history
   without silently updating another.
 - Invalid enumerations, impossible amounts, cross-scope access, repeated keys,
@@ -708,12 +752,15 @@ order, payment, fulfillment, and remittance axis.
 
 - Run a state-transition cross-product, transaction rollback, concurrency,
   double-tap, and direct unauthorized API suite.
+- Submit the same manual request/key twice, then reuse the key with a different
+  payload; prove exactly one order, no Sheet write, and the correct conflict.
 - Inspect one synthetic order timeline after independent updates.
 
-**AI Can Help With:** Implement transactional services and generated transition
-tests.
-**Student Must Judge:** Whether allowed transitions mirror actual campus and
-regional handoffs without collapsing states.
+**AI Can Help With:** Implement transactional creation/state services,
+conservative match warnings, and generated transition tests.
+**Student Must Judge:** The exact Member/PIC assignment boundary when this task
+is reached, plus whether allowed transitions mirror actual campus handoffs
+without collapsing states. Do not guess the unresolved assignment policy.
 **Risk Level:** High
 
 ## Issue 18: Deliver scoped mobile order search and detail
@@ -761,8 +808,9 @@ overloading the phone layout or exposing excess PII.
 **Requirement IDs:** FR-015, FR-024-FR-033, AC-004
 **Priority:** P1
 **Parallelizable:** Yes, after T018
-**Goal:** Support pickup-point sales and relationship/division attribution
-without requiring regional delivery fields.
+**Goal:** Complete pickup-point sales from either safe manual entry or a
+synchronized order, with relationship/division attribution and no regional
+delivery requirement.
 **Depends on:** T014, T016, T017, T018
 **Likely Files:** `src/domain/campus-order.ts`, `src/routes/campus-orders.ts`,
 `src/client/orders/campus/`, `test/orders/campus-flow.spec.ts`
@@ -770,6 +818,11 @@ without requiring regional delivery fields.
 **Acceptance Criteria:**
 
 - Campus orders require pickup point and PIC but not regional address/contact.
+- A direct buyer may be recorded through T017 without completing Google Form;
+  the UI may recommend Form intake but cannot make it a prerequisite.
+- Manual and synchronized orders use the same downstream state, finance, audit,
+  closure, and report services; source type remains visible to authorized users.
+- Potential same-activity matches are shown as warnings and never auto-merged.
 - Known relationships use controlled committee/division master data.
 - An unattributed buyer can receive a division attribution plus an explicit
   pickup-assigned note.
@@ -794,10 +847,11 @@ matches the committee workflow.
 **User Story:** US-006
 **Requirement IDs:** FR-014, FR-024-FR-033, AC-004
 **Priority:** P1
-**Parallelizable:** Yes, after T018
+**Parallelizable:** No; intentionally sequenced after the campus loop
 **Goal:** Support area/PIC assignment and each regional handoff while preserving
-independent fulfillment, payment, and remittance meaning.
-**Depends on:** T014, T016, T017, T018
+independent fulfillment, payment, and remittance meaning by reusing the proven
+campus order, finance, audit, closure, and reporting foundations.
+**Depends on:** T033
 **Likely Files:** `src/domain/regional-order.ts`,
 `src/routes/regional-orders.ts`, `src/client/orders/regional/`,
 `test/orders/regional-flow.spec.ts`
@@ -818,7 +872,8 @@ independent fulfillment, payment, and remittance meaning.
 
 **AI Can Help With:** Implement regional validation, queues, and tests.
 **Student Must Judge:** Whether the handoff labels and unresolved filters match
-actual regional operations.
+actual regional operations. Regional must not trigger a redesign of the proven
+shared campus services without an explicit artifact amendment.
 **Risk Level:** High
 
 ## Issue 21: Implement independent financial read models
@@ -831,7 +886,7 @@ SC-006, AC-005
 **Parallelizable:** No
 **Goal:** Calculate recognized, collected, outstanding, remitted, capital, and
 approved-loss values independently from UI rendering.
-**Depends on:** T002, T015, T017, T019, T020
+**Depends on:** T002, T015, T017, T019
 **Likely Files:** `src/domain/finance.ts`, `src/services/financial-read-model.ts`,
 `test/domain/finance.spec.ts`, `test/finance/read-model.integration.spec.ts`
 
@@ -990,6 +1045,9 @@ no real Sheet contents or credentials in source control
 
 - The project owner defines or removes `Column 1`; until then the mapper ignores
   it and no production mapping proceeds.
+- Real spreadsheet IDs and credentials are supplied only when this integration
+  task is reached; their current absence does not block manual campus issues and
+  they must never be added to fixtures, source, logs, screenshots, or evidence.
 - A separate duplicate response Sheet is created with sanitized rows, the
   verified response headers, and an application-managed `Order ID` header.
 - Access is limited to the smallest test credential scope and the duplicate
@@ -1035,6 +1093,9 @@ preview with row-level reasons.
   D1/order/Sheet write.
 - Preview classifies each sanitized row as candidate, existing-ID skip, or
   malformed with a row-level reason and no buyer value in logs.
+- Preview also applies a conservative same-activity comparison against manual
+  orders and labels possible matches for Coordinator/Deputy review. It performs
+  no automatic merge, link, rejection, or source-type change.
 - UI exposes pending/progress state and prevents duplicate preview submission.
 
 **Verification:**
@@ -1058,7 +1119,8 @@ an operator from committing a bad mapping.
 SC-002, AC-003
 **Priority:** P1
 **Parallelizable:** No
-**Goal:** Commit each valid source row once and write only the same immutable
+**Goal:** Commit each reviewed source row once—either importing it separately or
+linking it to an existing manual order—and write only the selected immutable
 Order ID into the header-located source cell, safely across partial failures.
 **Depends on:** T005, T006, T007, T017, T026
 **Likely Files:** `src/services/sync-commit.ts`,
@@ -1067,7 +1129,13 @@ Order ID into the header-located source cell, safely across partial failures.
 
 **Acceptance Criteria:**
 
-- The D1 transaction creates one order/ledger result before an `Order ID`
+- A possible manual match cannot commit until Coordinator/Deputy explicitly
+  chooses `link existing order` or `import separately`; omission or an
+  unauthorized decision fails before any write.
+- Separate import creates one `form_sync` order; explicit link creates no new
+  order and binds the source row to the selected `manual` Order ID. Both record
+  reviewer, decision, timestamp, and audit event in D1 before write-back.
+- The D1 transaction creates one order/link ledger result before an `Order ID`
   write-back is attempted.
 - Retry checks D1 source identity, ledger state, and source ID so a failed
   write-back cannot create a second order.
@@ -1083,6 +1151,8 @@ Order ID into the header-located source cell, safely across partial failures.
 - Run test-double scenarios for full success, failure before commit, failure
   after D1 commit/before write-back, mixed batch, retry, replay, and changed
   source values.
+- Test possible-match omission, unauthorized resolution, explicit link, and
+  import-separately cases; prove no path auto-merges two orders.
 - Assert the captured write set contains only `Order ID` cells.
 
 **AI Can Help With:** Implement the transaction/ledger algorithm and fault
@@ -1108,11 +1178,14 @@ sanitized evidence record; never a downloaded real Sheet
 **Acceptance Criteria:**
 
 - The duplicate Sheet includes valid, malformed, existing-ID, and intentionally
-  interrupted rows with no real data.
+  interrupted rows plus possible and false-positive manual matches, with no real
+  data.
 - Three sync runs create zero additional orders after the first successful
   import, while failed rows remain safely retryable.
 - Captured Sheet history proves only the header-located `Order ID` cells changed
   and the same immutable IDs exist in D1.
+- Explicit link and import-separately decisions produce the expected order/link
+  counts and audited reviewer records; no possible match is auto-merged.
 - New Form responses coexist with the added `Order ID` column without shifting
   or destroying mapping.
 - Real-Sheet writes remain disabled after the proof; enabling them requires a
@@ -1140,7 +1213,7 @@ workflow and whether the evidence is sufficient to consider later real writes.
 **Parallelizable:** No
 **Goal:** Show accurate activity status, progress, money, and unresolved counts
 without leaking order-level personal/proof data to report-only roles.
-**Depends on:** T021, T022, T028
+**Depends on:** T021, T022
 **Likely Files:** `src/services/dashboard.ts`, `src/routes/dashboard.ts`,
 `src/client/dashboard/`, `test/dashboard/dashboard.spec.ts`
 
@@ -1380,6 +1453,9 @@ T033
 - Status never relies on color alone; field-level errors retain valid input.
 - Long operations expose pending/progress and prevent accidental duplicate
   submission.
+- User-facing P1 copy is primarily Bahasa Indonesia and operational timestamps
+  display consistently in WITA (`Asia/Makassar`) without changing stored audit
+  instants. English translation is not required for P1.
 
 **Verification:**
 
@@ -1594,7 +1670,7 @@ acceptable and whether the P2 feature should ship at all.
 | US-001-US-002, FR-001-FR-010 | T003, T008-T014, T034 |
 | US-003, FR-011-FR-016 | T004, T015-T016 |
 | US-004, FR-017-FR-023 | T005, T007, T025-T028 |
-| US-005-US-007, FR-024-FR-033 | T005, T011, T017-T020, T023 |
+| US-005-US-007, FR-024-FR-033 | T005, T011, T017-T020, T023; manual intake is owned by T005/T007/T017/T019 and Form/manual review by T026-T028 |
 | US-008-US-009, FR-034-FR-042 | T006, T017, T021-T022, T030 |
 | US-010-US-011, FR-043-FR-052 | T007, T024, T029-T033 |
 | US-012, FR-053-FR-056 | T040 only; explicitly outside P1 without owner opt-in |
@@ -1623,26 +1699,32 @@ acceptable and whether the P2 feature should ship at all.
 | Treasurer workbook-layout approval | T031-T032 |
 
 No approved P1 requirement or mandatory remaining gate is intentionally
-unassigned. T040 is the only approved P2 candidate and remains unscheduled
-without separate owner approval.
+unassigned. A waiting Sheet target blocks only T025-T028 and final P1 evidence,
+not dependency-ready manual campus implementation. T040 is the only approved P2
+candidate and remains unscheduled without separate owner approval.
 
-## Owner Review Questions
+## Owner Review Record and Remaining Decisions
 
-1. Do you approve the T001-T039 order, scope, dependencies, and risk gates as
-   the P1 implementation backlog?
-2. Are any tasks still too large to review in one sitting, or should any
-   parallelizable task be made sequential to reduce file overlap?
-3. Do you approve the named blocking rules for deployed authentication, Drive,
-   duplicate Sheet, Treasurer layout, authorization/privacy, performance,
-   migrations, and the PII scan?
-4. Should T040 remain deferred and unpublished unless you explicitly opt in
-   after P1 acceptance?
-5. After approval, may these Task IDs be published as individual GitHub issues,
-   one issue per task, without changing their approved scope?
+- The project owner approved T001-T039 as the P1 learning/reference backlog on
+  2026-09-02. T040 remains deferred unless separately promoted later.
+- This amendment preserves all existing Task IDs and risk gates while moving
+  the complete campus loop before T020 regional behavior and preventing Sheet
+  readiness from blocking manual campus work.
+- When T016 is reached, ask only which activity fields may change after
+  activation if that answer is required to finish the task.
+- When T017 is reached, ask only for the exact Member/PIC assignment boundary if
+  that answer is required to finish authorization behavior.
+- Real Sheet target/credential decisions, Drive ACL inspection, Treasurer
+  layout approval, and production/release authority remain just-in-time human
+  gates. An agent should continue other dependency-ready tasks while any such
+  unrelated gate waits.
+- This amended ordering and acceptance text now requires one short owner
+  confirmation before project agent rules or implementation prompts are made.
 
 ## Next Step
 
 Stop for project-owner review. Do not publish individual GitHub issues and do
-not run `issue-to-prompt` yet. After the owner accepts this artifact, publish
-only the approved tasks, then select the first dependency-ready task and use
-`issue-to-prompt`.
+not run `issue-to-prompt` yet. After the owner accepts this amended artifact,
+use `agent-rules` to record the autonomous working agreement and just-in-time
+human gates. Then select T001 and use `issue-to-prompt`; publish individual
+GitHub issues only if the owner separately requests that tracker action.
