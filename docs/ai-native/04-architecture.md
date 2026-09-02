@@ -2,13 +2,16 @@
 
 ## Status and Scope
 
-Approved by the project owner on 2026-07-26. The final TypeScript + Hono + one
-Cloudflare Worker + D1 + `write-excel-file@4.1.1` stack was accepted on the same
-date after the sanitized compatibility proof passed. This plan designs the
-approved MVP only: one product and one mode per activity, manual Google Forms
-import, independent operational/financial states, audit, closure, and Excel
-export. Stack acceptance authorizes implementation-issue planning, but not
-feature implementation, a production Sheet write, or a Drive integration.
+Approved by the project owner on 2026-07-26 and amended by owner direction on
+2026-09-02. The final TypeScript + Hono + one Cloudflare Worker + D1 + Vite
+static client + `write-excel-file@4.1.1` stack remains accepted after the
+sanitized compatibility proof passed. This plan designs the approved MVP only:
+one product and one mode per activity, safe manual order entry, manual Google
+Forms import, independent operational/financial states, audit, closure, and
+Excel export. Implementation is campus-first; regional distribution remains P1
+but follows proof of the complete campus loop. Stack acceptance authorizes
+implementation-issue planning, but not feature implementation, a production
+Sheet write, or a Drive integration.
 
 The approved constitution is binding. No conflict was found between it and the
 PRD/clarification log. In particular, a convenient single `status` field, a
@@ -41,8 +44,9 @@ conflict with the constitution and are rejected.
 | --- | --- | --- |
 | US-001, FR-001--FR-008, NFR-001--NFR-005 | D1 accounts, password verifiers, server sessions, lockout state, and centralized authorization middleware | Role matrix and auth integration tests, including direct API denials |
 | US-002--US-003, FR-009--FR-016 | Controlled account/committee/activity tables; one-product constraint and integer-rupiah calculation module | Migration, validation, and calculation tests |
-| US-004, FR-017--FR-023, SC-001--SC-002 | Explicit manual sync run and row ledger; header mapping; DB uniqueness; write-back of `Order ID` only | Duplicate fixture Sheet synced three times; no real-Sheet write beforehand |
-| US-005--US-007, FR-024--FR-033 | Mobile-first screens, scoped queries, independent state records and server checks | 360x800/390x844 manual checks and Member/PIC cross-scope denial tests |
+| US-004, FR-017--FR-023, SC-001--SC-002 | Explicit manual sync run, immutable internal IDs, source typing, Sheet-row ledger, reviewed manual/Form linking, and `Order ID`-only write-back | Duplicate fixture Sheet synced three times; manual/Form match cases; no real-Sheet write beforehand |
+| US-005/US-007, FR-024--FR-033 | Campus-first mobile screens, idempotent manual entry, scoped queries, independent state records, and server checks | Complete campus loop at 360x800/390x844; double-submit and cross-scope denial tests |
+| US-006, FR-024--FR-033 | Regional area/PIC queue reusing the proven order, state, finance, and audit services | Regional behavior added after campus-loop evidence; area/PIC scope and remittance tests |
 | US-008--US-009, FR-034--FR-042, SC-006--SC-008 | Integer-rupiah calculation module, append-only audit events, correction/approval workflow | Independently calculated sanitized fixture and audit-history tests |
 | US-010--US-011, FR-043--FR-052, SC-005/SC-009 | Read models, closure validator, immutable closed report metadata, worker-generated `.xlsx` | Privacy/closure tests; open generated file in Excel; Treasurer layout review |
 | US-012, FR-053--FR-056 | Optional browser-local new-entry draft envelope with idempotency key; excluded from server read models | Ship only after interrupted-network proof; otherwise omit |
@@ -78,9 +82,9 @@ external-system, privacy, or report-layout gates below.
 - **One Worker API:** Hono routes, authentication/session middleware, role and
   assignment policy, input validation, calculation/closure/export orchestration,
   and Google Sheets API calls. It returns role-specific DTOs, never raw tables.
-- **D1:** Source of truth after import: relational operational data, sessions,
-  lock state, audit events, sync ledger, and report metadata. Payment-proof
-  bytes are expressly excluded.
+- **D1:** Source of truth as soon as an order is created manually or imported:
+  relational operational data, sessions, lock state, audit events, sync/link
+  ledger, and report metadata. Payment-proof bytes are expressly excluded.
 - **Google Sheets API:** Coordinator/Deputy-only manual read/preview and a
   narrow `Order ID` cell write after order commit. A server-held Google
   credential is a deployment secret, never a client credential.
@@ -100,19 +104,27 @@ external-system, privacy, or report-layout gates below.
 2. Each protected request resolves the hashed token in D1, verifies account
    active/reset state, role, activity assignment, and closure rules before
    querying or mutating data. UI hiding is only presentation.
-3. A Coordinator/Deputy starts a manual sync. The Worker reads Sheet headers,
-   rejects missing/ambiguous required mapping, shows a preview, then handles
-   each row with an empty `Order ID` in a transaction that creates exactly one
-   immutable application ID and sync-row result.
-4. After that transaction commits, the Worker writes **only** that ID into the
-   header-located Sheet cell. Retry first checks the D1 order/ledger and Sheet
-   ID, so a failed write-back cannot create a second order. Existing IDs are
-   skipped; malformed rows receive row-level errors. Later Sheet edits never
+3. An authorized Coordinator/Deputy or assigned Member/PIC may create a manual
+   order for an active activity. The Worker validates scope, consumes an
+   idempotency key, searches conservatively for same-activity potential matches,
+   and creates exactly one immutable application ID with source type `manual`.
+   It never fabricates or writes a Google Sheet row identity.
+4. A Coordinator/Deputy starts a manual sync. The Worker reads Sheet headers,
+   rejects missing/ambiguous required mapping, and previews each row. A possible
+   match to a manual order is flagged but never merged automatically. The
+   reviewer explicitly chooses to link the response to the existing order or
+   import it separately; the decision and actor are audited.
+5. Commit handles each approved row in a transaction. A new import creates one
+   immutable application ID with source type `form_sync`; a link reuses the
+   reviewed manual Order ID. After commit, the Worker writes **only** the chosen
+   ID into the header-located Sheet cell. Retry first checks the D1 link ledger
+   and Sheet ID, so failed write-back cannot create another order. Existing IDs
+   are skipped; malformed rows receive row-level errors. Later Sheet edits never
    update the application order.
-5. Authorized operations create state/financial/correction records and an
+6. Authorized operations create state/financial/correction records and an
    audit event in the same D1 transaction. Read models calculate totals from
    those records, not from a denormalized UI total.
-6. Closure runs a deterministic blocker query. Only a Coordinator/Deputy can
+7. Closure runs a deterministic blocker query. Only a Coordinator/Deputy can
    close; closure writes an audit event and makes operational mutations fail.
    An authorized export reads the closed snapshot/rules and streams the XLSX.
 
@@ -125,11 +137,12 @@ external-system, privacy, or report-layout gates below.
 | `committee_members` / `divisions` | id, display name, division_id, active | Separate from accounts so attribution does not create access |
 | `activities` | id, product, mode, integer unit prices, target_qty, period, status | Exactly one product; campus pickup configuration XOR regional area/PIC configuration |
 | `additional_costs` | id, activity_id, integer amount_rp, description | Description required; contributes to planned capital |
-| `orders` | immutable order_id, activity_id, source row identity, buyer fields, qty, assigned_pic_id, attribution | Unique order ID; unique source identity when imported; mode-specific fields required |
+| `orders` | immutable order_id, activity_id, source_type (`manual` or `form_sync`), buyer fields, qty, assigned_pic_id, attribution, created_by/time | Unique Order ID; manual orders have no Sheet identity; mode-specific fields required; creation is idempotent |
 | `order_state`, `payments`, `fulfillments`, `remittances` | order_id plus independent state, amounts where applicable, actor/time | Separate tables/history; CHECK constraints restrict enumerations; no transition updates another axis |
 | `issues` / `corrections` / `approvals` | target type/id, proposed and resolved values, reason, actor/time, approver/time | Confirmed values void/correct, not delete; financial effect requires Coordinator/Deputy approval |
 | `audit_events` | id, entity type/id, action, before_json, after_json, reason, actor_id, occurred_at | Append-only application history; records mandatory correction fields |
-| `sheet_connections`, `sync_runs`, `sync_rows` | Sheet/tab config, header mapping version, run state, source row, outcome, order_id, reason | Manual runs only; row ledger enables safe retry and imported/skipped/failed report |
+| `sheet_connections`, `sync_runs`, `sync_rows` | Sheet/tab config, header mapping version, run state, source row, outcome, candidate order, reviewer decision, actor/time, reason | Manual runs only; preview cannot mutate; row ledger enables safe retry and imported/linked/skipped/failed report |
+| `sheet_order_links` | activity_id, sheet connection, stable source-row identity, order_id, resolution (`imported` or `linked`), resolved_by/time | Unique source identity per Sheet; may point to a manual or imported order; created only by reviewed sync commit |
 | `report_versions` | id, activity_id, generated_by/time, checksum, template version, closed snapshot reference | Download only if activity is closed and role permits; no buyer/proof DTO for Officer/Treasurer views |
 | `idempotency_keys` | account, route, key, request hash, result reference, expiry | Prevent repeated financial mutation/local-draft retry from creating more than one effect |
 
@@ -145,8 +158,9 @@ full scans; Cloudflare notes indexes reduce D1 rows read.
 | --- | --- | --- | --- |
 | `POST /api/auth/login` | username, password | Generic success/failure; delayed warning after third failure; locked response after fifth | FR-001--008, NFR-002--004 |
 | Protected API middleware | cookie + route/resource | Redacted principal or 401/403; current role and assignment evaluated server-side | FR-002, FR-030--031, NFR-001 |
-| `POST /api/activities/:id/sync/preview` | configured Sheet/tab | Validated headers and candidate rows; no writes | FR-017--018 |
-| `POST /api/activities/:id/sync/commit` | confirmed preview/run id | imported/skipped/failed rows; exactly-one ID write intent; retry-safe | FR-019--023, NFR-010/013/014 |
+| `POST /api/activities/:id/orders` | manual order fields + idempotency key | One immutable manual Order ID plus potential-match warning; 403 scope, 409 inactive/duplicate request | US-005/US-007, FR-019/024/030, NFR-010/012 |
+| `POST /api/activities/:id/sync/preview` | configured Sheet/tab | Validated headers, candidate rows, and possible manual matches; no application or Sheet writes | FR-017--018 |
+| `POST /api/activities/:id/sync/commit` | confirmed preview/run id + explicit per-match resolution | imported/linked/skipped/failed rows; exactly-one ID write intent; retry-safe and audited | FR-019--023, NFR-010/013/014 |
 | `PATCH /api/orders/:id/*` | permitted state/payment/remittance/correction + idempotency key | Updated independent axis and audit reference; 409 closed/duplicate, 403 scope/approval | FR-024--042 |
 | `POST /api/activities/:id/close` | closure confirmation | blocker list or closed result/audit event | FR-047--049 |
 | `POST /api/activities/:id/reports` and `GET .../reports/:version` | closed activity / authorized download | XLSX stream or 403/409 | FR-050--052 |
@@ -156,9 +170,13 @@ full scans; Cloudflare notes indexes reduce D1 rows read.
 - Sign-in and forced password-change screen; Coordinator/Deputy account and committee
   administration.
 - Activity list/dashboard; compact cards and drill-down rather than desktop
-  spreadsheet tables.
+  spreadsheet tables. Primary UI copy is Bahasa Indonesia; operational time is
+  displayed in WITA (`Asia/Makassar`) while stored timestamps remain unambiguous.
 - Activity setup with mode-conditional sections and cost items.
-- Sync preview/results with header validation, row outcomes, and one guarded
+- Campus order lookup/manual-entry flow with duplicate-submit protection and a
+  potential-match warning; Google Form remains preferred but is not mandatory.
+- Sync preview/results with header validation, possible manual-order matches,
+  explicit link/import-separately decisions, row outcomes, and one guarded
   commit action.
 - Search/filter, order detail, state updates, issue/correction timeline, and
   regional PIC/area queue. Officers/Treasurers receive aggregate-only routes.
@@ -201,6 +219,8 @@ retain valid input.
 | Session expired/deactivated/reset | Revoke/deny, clear local draft, require authentication/password change as applicable |
 | Missing/renamed Sheet header or `Column 1` | Stop before any write; identify header issue; `Column 1` remains ignored |
 | Partial import or Sheet write failure | Preserve row result and committed order/ID; retry safely without duplicate order; report each row |
+| Manual double-submit or weak-network retry | Return the stored idempotent result; never create a second order or any Sheet identity |
+| Form response resembles a manual order | Flag a conservative same-activity potential match; require Coordinator/Deputy to link or keep separate; never auto-merge |
 | Repeated POST/double tap/weak retry | Return stored idempotent result, not a second financial or order mutation |
 | Unauthorized/cross-scope/closed mutation | Return 403/409; no partial update and no sensitive detail in error |
 | Invalid proof link or private Drive access lost | Flag for review; never delete confirmed order silently; operational owner repairs ACL/link |
@@ -266,8 +286,9 @@ checks remain explicit acceptance evidence rather than mocked claims.
 2. **Hono + static client, not SSR or microservices** — supports Worker routing
    and assets with less operational surface; no framework-specific assumption
    substitutes for compatibility testing.
-3. **D1 is authoritative only after import** — Sheet is intake and ID ledger;
-   later Sheet edits never overwrite trusted records.
+3. **D1 is authoritative at manual creation or import** — Sheet is an optional
+   intake and ID ledger, not a prerequisite for a valid order; later Sheet edits
+   never overwrite trusted records.
 4. **Four independent state axes and history** — preserves distinct order,
    payment, fulfillment, and remittance meaning and makes totals auditable.
 5. **Server sessions and centralized authorization** — satisfies individual
@@ -282,6 +303,14 @@ checks remain explicit acceptance evidence rather than mocked claims.
    artifact amendment, focused module change, tests, and a versioned migration
    when data changes; current MVP behaviour is not weakened for hypothetical
    future requirements.
+9. **Campus-first delivery, regional-complete P1** — the campus order-to-close
+   loop provides the first usable evidence and reduces simultaneous unknowns;
+   regional area/PIC behavior is added afterward by reusing those services and
+   remains mandatory before the complete P1 release.
+10. **Manual/Form association is explicit, never inferred** — conservative
+    matching only raises a warning. A Coordinator/Deputy must choose link or
+    separate import, and the application records that decision. This protects
+    valid buyers who happen to share similar details.
 
 ## Owner Review and Remaining Validation
 
@@ -294,6 +323,14 @@ therefore approved. The compatibility proof subsequently passed, the unsafe
 original XLSX candidate was removed, and the owner accepted
 `write-excel-file@4.1.1` as the final replacement on 2026-07-26.
 
+On 2026-09-02, the owner approved all P1 backlog items as a learning/reference
+implementation, selected Bahasa Indonesia and WITA for the MVP, prioritized the
+complete campus workflow before regional expansion, and confirmed that Google
+Form intake is preferred but optional because authorized users may create safe
+manual orders. The exact Member/PIC assignment boundary and which activity
+fields remain editable after activation are still explicit human checkpoints;
+the implementation must not guess them when their dependent issues are reached.
+
 The later validation and release gates still require: controlled
 duplicate-Sheet authorization before real writes; definition/removal of
 `Column 1`; private Drive permission review; Treasurer approval of workbook
@@ -304,5 +341,7 @@ owner and revise this plan rather than silently expanding infrastructure.
 
 The compatibility evidence is recorded in
 `docs/ai-native/16-stack-compatibility-spike.md`, and the final stack is
-confirmed. The next authorized action is `architecture-to-issues`; it must
-produce issue planning only and must not begin feature implementation.
+confirmed. This 2026-09-02 amendment must receive a short owner review before
+`architecture-to-issues` updates implementation ordering and acceptance tests.
+Neither that review nor the existing backlog approval authorizes feature code,
+production Sheet writes, or deployment.
