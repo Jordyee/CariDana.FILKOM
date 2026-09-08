@@ -2,8 +2,11 @@
 
 ## Status
 
-Approved by the project owner on 2026-07-22. The clarification gate is
-resolved, and the PRD is ready for `project-constitution`.
+Approved by the project owner on 2026-07-22 and amended by the project owner on
+2026-09-02 to retain safe manual order entry, prioritize the campus milestone,
+use Bahasa Indonesia as the primary UI language, and use WITA operational time.
+Q4-Q5 in `15-clarification-log.md` remain explicit future human checkpoints;
+they do not authorize implementation guesses.
 
 ## Product
 
@@ -23,6 +26,12 @@ and exports a closed activity as an Excel workbook.
 
 The MVP must prove one complete activity loop before adding realtime sync,
 advanced analytics, broad accounting, or multi-product support.
+
+Implementation is campus-first. The first usable milestone must complete the
+campus fundraising loop before regional-specific screens and handoff behavior
+are prioritized. Regional fundraising remains inside P1 and is still required
+for the complete P1 release; it is sequenced after the campus loop rather than
+removed from scope.
 
 ## Target Users
 
@@ -238,12 +247,16 @@ tasks at a 360 x 800 viewport without horizontal page scrolling.
 
 **Acceptance Scenarios:**
 
-1. Given an authorized user, when an order is opened, then its buyer,
+1. Given an authorized Coordinator, Deputy, or assigned Member/PIC, when a
+   manual order is submitted once or retried with the same idempotency key,
+   then exactly one order with an immutable internal Order ID is created and no
+   Google Sheet row is written.
+2. Given an authorized user, when an order is opened, then its buyer,
    attribution, quantity, financial, fulfillment, PIC, issue, and history data
    appear according to role permissions.
-2. Given a member assigned to the order, when an operational state is updated,
+3. Given a member assigned to the order, when an operational state is updated,
    then the change is saved with actor and time.
-3. Given a member not assigned to the order, when restricted buyer data is
+4. Given a member not assigned to the order, when restricted buyer data is
    requested directly, then the server denies access.
 
 ### US-006 - Run Regional Distribution (Priority: P1)
@@ -437,6 +450,11 @@ record is created.
    cell.
 5. Existing IDs are skipped; invalid rows are reported with reasons.
 6. Operator receives imported, skipped, and failed counts.
+7. If a response appears to match an existing manual order, the preview flags
+   it for Coordinator/Deputy review and never merges automatically. The reviewer
+   may link the response row to the existing manual Order ID or import it as a
+   distinct order; the decision is audited and only the selected Order ID cell
+   may be written.
 
 ### Flow 4 - Regional Distribution
 
@@ -454,6 +472,13 @@ record is created.
    an unattributed buyer.
 4. PIC records pickup and payment until available quantity is exhausted.
 5. Coordinator monitors totals and performs reconciliation.
+
+Campus orders may originate from Google Form synchronization or direct manual
+entry. Google Form is preferred when practical but is not required for an
+in-person buyer. Manual entry must search for same-activity potential matches,
+use an idempotency key, receive its own immutable Order ID, and remain separate
+from Sheet write-back unless a Coordinator/Deputy explicitly links a later Form
+response during sync review.
 
 ### Flow 6 - Audit, Close, And Export
 
@@ -522,7 +547,8 @@ record is created.
   member, buyer name, buyer phone, map/location link, region, quantity, payment
   method, payment proof, and notes. The ambiguous `Column 1` header MUST be
   ignored until its purpose is explicitly defined.
-- **FR-019**: Every application order MUST have one immutable internal Order ID.
+- **FR-019**: Every application order MUST have one immutable internal Order ID
+  and an explicit source type of synchronized Form response or manual entry.
 - **FR-020**: For a valid source row with an empty `Order ID` cell, successful
   synchronization MUST create one order and write the same immutable ID back to
   that cell without changing other source values. The system MUST locate the
@@ -537,9 +563,10 @@ record is created.
 
 ### Orders And Operations
 
-- **FR-024**: An order MUST store quantity, buyer identity, relationship
+- **FR-024**: An imported or manually created order MUST store quantity, buyer identity, relationship
   attribution, mode-specific location, assigned PIC, payment method, proof link,
-  notes, and independent operational states where applicable.
+  notes, source type, and independent operational states where applicable. A
+  manual order MUST NOT require or fabricate a Google Sheet row identity.
 - **FR-025**: Order state MUST be one of pending confirmation, confirmed, or
   cancelled.
 - **FR-026**: Payment state MUST be one of unpaid, partially paid, or paid and
@@ -671,8 +698,9 @@ record is created.
 
 ### Reliability And Data Integrity
 
-- **NFR-010**: Import, local-draft retry, and financial mutation endpoints MUST
-  be idempotent where repeated submission could duplicate data.
+- **NFR-010**: Import, manual-order submission, local-draft retry, and financial
+  mutation endpoints MUST be idempotent where repeated submission could
+  duplicate data.
 - **NFR-011**: Money MUST be stored and calculated using integer rupiah values,
   not binary floating-point amounts.
 - **NFR-012**: Database constraints MUST prevent duplicate Order IDs and invalid
@@ -693,6 +721,14 @@ record is created.
 - **NFR-018**: Forms MUST provide field-level validation messages and preserve
   valid user input after a failed submission.
 - **NFR-019**: The MVP SHOULD meet WCAG 2.2 AA for core P1 workflows.
+
+### Language And Time
+
+- The MVP user interface uses Bahasa Indonesia as its primary language.
+  English translation is a later enhancement unless separately promoted into
+  P1. Operational dates and times are displayed in Waktu Indonesia Tengah
+  (`Asia/Makassar`); persisted timestamps should remain unambiguous and
+  convertible for audit purposes.
 
 ### Performance And Compatibility
 
