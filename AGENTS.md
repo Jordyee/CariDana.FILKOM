@@ -7,6 +7,11 @@ AI agent that plans, implements, tests, reviews, commits, or pushes work. The
 project owner delegates routine engineering execution, not product, financial,
 privacy, security, or release judgment.
 
+The project owner also grants standing authority to open, review, and merge
+project PRs after every rule in the GitHub PR, Merge, and Audit Policy passes.
+This authority does not include production deployment, release publication,
+real-data access, paid resources, or bypassing a milestone/human gate.
+
 ## Sources Read
 
 - `docs/ai-native/03-prd.md`
@@ -15,6 +20,8 @@ privacy, security, or release judgment.
 - `docs/ai-native/14-project-constitution.md`
 - `docs/ai-native/15-clarification-log.md`
 - `package.json`
+- [GitHub profile contributions reference](https://docs.github.com/en/account-and-profile/reference/profile-contributions-reference)
+- [GitHub contributor attribution guidance](https://docs.github.com/en/repositories/viewing-activity-and-data-for-your-repository/viewing-a-projects-contributors)
 
 ## Project Purpose
 
@@ -83,10 +90,14 @@ dependency-ready T001-T039 work without routine confirmation:
    required verification before declaring the issue done.
 7. Review the diff for scope, clarity, security, privacy, migrations, accidental
    secrets, and unrelated edits. Fix findings within the attempt policy below.
-8. Commit one reviewable Task-ID-scoped change and push the current task or
-   milestone branch after checks pass.
-9. Report what changed, commands/evidence, residual risks, and the next
-   dependency-ready issue. Continue automatically unless a stop rule applies.
+8. Record material actions and verification evidence as required below. Commit
+   one reviewable Task-ID-scoped change and push the current task or milestone
+   branch after checks pass.
+9. Open or update the PR, perform the complete review/merge gate, and merge it
+   automatically when eligible. Synchronize the local base branch afterward.
+10. Report what changed, commands/evidence, residual risks, merge reference,
+    and the next dependency-ready issue. Continue automatically unless a stop
+    rule applies.
 
 Do not mark an issue complete merely because code was written. Every acceptance
 criterion needs test, inspection, or explicit external/human evidence.
@@ -128,8 +139,8 @@ conditions occurs:
    schema direction, or a mandatory gate.
 3. Work would deploy to production, write to the real response Sheet, use real
    buyer/proof data, inspect or change real Drive membership, create paid
-   resources, expose a secret, or authorize a release. Prior permission to push
-   code is not permission for these actions.
+   resources, expose a secret, or publish a release. Standing permission to
+   push and merge reviewed code is not permission for these actions.
 4. A credential, personal datum, real proof/map link, sensitive financial value,
    or real external identifier appears in source, fixtures, logs, screenshots,
    exports, terminal output, or a proposed commit and cannot be safely contained
@@ -256,8 +267,9 @@ Known checkpoints include:
   field errors, and retained valid input are required.
 - Do not remove, skip, weaken, or rewrite a failing test merely to obtain green
   output. Update a test only when approved behavior changed, and explain why.
-- Do not publish GitHub issues, open/merge a PR, merge branches, tag a release,
-  or deploy unless the owner separately requests that external action.
+- Do not publish GitHub issues, delete remote branches, tag/publish a release,
+  or deploy unless the owner separately requests that external action. Opening
+  and merging eligible project PRs is authorized by the policy below.
 
 ## Commands
 
@@ -294,12 +306,13 @@ Before claiming an issue complete:
 - Mobile UI changes are checked at 360x800 and 390x844 plus keyboard/focus
   behavior using sanitized data.
 - The commit message includes the Task ID. Push only after the branch is clean
-  enough for review; do not force-push or merge.
+  enough for review; never force-push. Merge only through the reviewed PR gate
+  below.
 
 If a required external or human item is pending, report the issue as blocked or
 partially evidenced—not complete.
 
-## Commit and Push Policy
+## GitHub PR, Merge, and Audit Policy
 
 - Use a dedicated `codex/` task or milestone branch based on the latest approved
   integrated baseline. Never implement directly on `main`.
@@ -310,9 +323,90 @@ partially evidenced—not complete.
   `docs(T019): record campus milestone evidence`.
 - Rebase/update only after inspecting divergence and preserving local/user
   work. Never force-push shared branches.
-- Push passing issue commits so work is recoverable. Opening or merging PRs,
-  deleting branches, publishing issues, tagging, releasing, and deploying still
-  require an explicit owner request.
+- Push passing issue commits so work is recoverable, then open or update a PR
+  against the intended approved base branch.
+- Use a merge commit by default so meaningful Task-ID commits and their authors
+  remain visible. Do not squash merely to inflate or simplify contribution
+  counts, and do not fabricate authorship.
+- Review the complete PR diff in context. Map it to the issue acceptance
+  criteria and confirm there are no unrelated changes, unresolved review
+  comments, merge conflicts, skipped/weakened tests, sensitive data, unexpected
+  dependencies, or stop conditions.
+- All required local commands and configured CI checks must pass. If CI is not
+  configured, explicitly record that fact and rely on the complete local
+  verification suite; an empty check list is not evidence that tests passed.
+- Capture or reproduce the base-branch result when a check fails. A rules/docs-
+  only PR may merge with a pre-existing baseline failure only when the PR does
+  not touch the failing runtime/dependency surface, the failure is unchanged on
+  the base, it is recorded with an owning Task ID, and it creates no immediate
+  exposure. New or worsened failures always block merge. This exception never
+  makes the failing gate pass and cannot be used for product-code, dependency,
+  migration, security-boundary, release, or deployment PRs.
+- Confirm the PR head is the reviewed commit and the base has not changed in a
+  way that invalidates the review. Re-review after material head/base changes.
+- When every condition passes, the agent may mark its own project PR ready and
+  merge it without asking again. Never merge a failing, conflicted, stale,
+  externally authored, out-of-scope, or human-gated PR merely because it is
+  mergeable.
+- After merge, verify the GitHub merge commit, fast-forward the clean local base
+  branch, rerun any post-merge check required by the issue, and post a concise
+  final audit comment on the merged PR. Do not delete the branch automatically.
+- A technical merge may occur before a T019/T033/T039 checkpoint report, but the
+  autonomous loop must still stop at that checkpoint before the next issue.
+- Publishing individual GitHub issues, deleting branches, tagging, releasing,
+  and deploying still require a separate explicit owner request.
+
+## Action and Failure Record
+
+Use `docs/ai-native/17-agent-action-log.md` as an append-only project ledger.
+GitHub's commit and PR timelines remain the authoritative timestamps for Git
+events; the ledger explains intent, checks, failures, and relationships that
+the raw timeline cannot.
+
+For each issue or rule-maintenance task:
+
+- Record WITA timestamp, Task ID/scope, branch, material action, result, and
+  commit/PR reference when available.
+- Record every state-changing Git/GitHub/external action and every verification
+  command with pass/fail/blocked outcome. Group read-only discovery commands by
+  purpose instead of logging every file read.
+- When accepting a documented pre-existing baseline failure for a docs-only
+  merge, name the owning issue and state which later work remains blocked.
+- Record failed remediation attempts as attempt 1-4 with hypothesis, scoped
+  change, command/evidence, and result. Never include secrets, PII, real proof
+  links, or sensitive command arguments.
+- Make prior rows immutable. Correct an inaccurate entry with a later
+  correction row rather than silently rewriting history.
+- Put a compact copy of the issue goal, acceptance mapping, commands/results,
+  failed attempts, residual risks, and merge eligibility in the PR description
+  or a review comment.
+- After merge, add a final PR comment with the merge commit and post-merge
+  verification. The GitHub event plus comment closes the audit trail without
+  creating a recursive log-only PR.
+
+Auditability must remain useful rather than performative: do not create empty,
+dummy, whitespace-only, timestamp-only, or artificially split commits merely to
+increase contribution counts.
+
+## GitHub Contribution Integrity
+
+Meaningful commits should reach the repository's default branch through
+reviewed PRs so genuine work is visible in repository history. GitHub documents
+that commit attribution depends on the commit email being associated with the
+account and, for the profile contribution graph, the commit reaching the
+default or `gh-pages` branch in a qualifying repository.
+
+- Before the first commit in a session, verify that repository `user.name` and
+  `user.email` are present and expected. Do not print the email into public logs
+  or repository artifacts.
+- Do not change Git identity, add co-authors, impersonate the owner, backdate
+  commits, or use another account merely to influence contribution metrics.
+- If identity is absent or unexpected, stop before committing and ask the owner.
+  Whether the configured email is associated with the GitHub account is an
+  account-setting judgment; do not request broader API scopes just to inspect it.
+- Prefer one meaningful commit per issue plus a justified audit/evidence commit
+  when needed. Quality and traceability take precedence over the number of green
+  squares.
 
 ## Stop Report Format
 
