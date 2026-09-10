@@ -1,16 +1,16 @@
 {
-  "name": "caridana-stack-compatibility-spike",
+  "name": "caridana-filkom",
   "private": true,
   "version": "0.0.0",
-  "description": "Throwaway, synthetic-only Cloudflare compatibility proof for CariDana.FILKOM.",
+  "description": "CariDana.FILKOM fundraising operations foundation.",
   "type": "module",
   "scripts": {
-    "build": "wrangler deploy --dry-run",
-    "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p test/tsconfig.json && wrangler types --check",
-    "db:migrate:local": "wrangler d1 migrations apply caridana-stack-compatibility --local",
-    "test": "vitest run",
+    "build:client": "vite build",
+    "build": "npm run build:client && wrangler deploy --dry-run",
+    "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.client.json && tsc --noEmit -p test/tsconfig.json && wrangler types --check",
+    "test": "npm run build:client && vitest run",
     "test:watch": "vitest",
-    "verify": "npm run db:migrate:local && npm run check && npm run test"
+    "verify": "npm run check && npm run test"
   },
   "dependencies": {
     "hono": "4.12.32",
@@ -19,9 +19,13 @@
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "0.18.8",
     "@types/node": "26.1.1",
-    "fflate": "0.8.2",
     "typescript": "7.0.2",
+    "vite": "8.3.0",
     "vitest": "4.1.10",
     "wrangler": "4.114.0"
+  },
+  "overrides": {
+    "sharp": "0.35.4",
+    "undici": "7.29.0"
   }
 }
