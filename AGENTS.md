@@ -72,6 +72,47 @@ precedence above, stop and ask; do not choose the most convenient behavior.
 - Optimize for current stable Chromium and the approved 360x800 and 390x844
   mobile viewports without a desktop-table dependency.
 
+## Task, Context, Model, and Branch Policy
+
+- Use one top-level Codex task/chat for exactly one implementation Task ID.
+  Do not begin a second implementation issue in the same task, even when it is
+  dependency-ready.
+- Start each issue just in time in a fresh project task/worktree and a dedicated
+  `codex/` task branch from the latest approved `main`. Open its reviewed PR
+  against `main`; do not commit directly to `main` or introduce a long-lived
+  `development` branch unless the project owner explicitly changes this policy.
+- At an issue boundary, finish the current audit record and provide a compact
+  handoff containing the Task ID/GitHub issue, merged or current commit, changed
+  files, verification evidence, dependency state, residual risks, and pending
+  human gates. Do not copy the full chat, full documents, raw logs, secrets,
+  personal data, proof references, or sensitive financial values into a handoff.
+- A fresh task MUST reload `AGENTS.md`, its issue body, relevant approved source
+  sections, and current Git state. Durable repository artifacts and GitHub
+  history are authoritative; hidden memory from an earlier chat is not.
+- Keep the main task context small through targeted reads, concise progress
+  updates, summarized command output, and durable evidence in the action log.
+  Create issue tasks only when they are ready to start; do not pre-create the
+  complete backlog.
+- The project owner does not need to repeat model preferences for every issue.
+  Use the configured default model for a new top-level task unless the owner
+  explicitly names another model. Select reasoning effort proportionally:
+  ordinary reversible work may use the normal/default effort, while security,
+  privacy, authorization, migrations, money/state/idempotency, concurrency,
+  external integration, failing gates, and final review require high effort.
+- Subagents are optional, not a substitute for a fresh issue task. Use them only
+  for concrete, bounded, independent work that benefits from isolation, such as
+  read-heavy exploration, documentation research, test/log analysis, or an
+  independent review. Return distilled findings to the main task.
+- Under the owner's standing preference, a subagent may use a model and
+  reasoning effort suited to its bounded role: prefer a faster/lighter option
+  for narrow read-only or mechanical work and a more capable/high-effort option
+  for risky analysis or review. Record material overrides in the handoff or
+  action log. More agents can increase total token usage, so never spawn one
+  merely to make the visible main context look smaller.
+- Avoid parallel agents that edit overlapping files, migrations, Git state, PR
+  state, or other shared mutable surfaces. The main task remains responsible for
+  integration, complete verification, PR review, and the final claim of done.
+
 ## Autonomous Issue Loop
 
 After these rules and the planning baseline are approved, the agent may execute
@@ -96,8 +137,9 @@ dependency-ready T001-T039 work without routine confirmation:
 9. Open or update the PR, perform the complete review/merge gate, and merge it
    automatically when eligible. Synchronize the local base branch afterward.
 10. Report what changed, commands/evidence, residual risks, merge reference,
-    and the next dependency-ready issue. Continue automatically unless a stop
-    rule applies.
+    and the next dependency-ready issue. End the current task, then start that
+    issue in a fresh task under the Task, Context, Model, and Branch Policy
+    unless a stop rule applies.
 
 Do not mark an issue complete merely because code was written. Every acceptance
 criterion needs test, inspection, or explicit external/human evidence.
