@@ -1,108 +1,93 @@
-# Loop Log — Issue #7 / T002
+# Loop Log — Issue #8 / T003
 
 ## Sources Read
 
-AGENTS.md; docs/ai-native/05-issues.md; docs/ai-native/07-issue-prompt.md,
-plus PRD, architecture, constitution, clarification and artifact-analysis notes.
+AGENTS.md; docs/ai-native/05-issues.md; saved 07-issue-prompt.md (read back),
+PRD/architecture identity requirements, constitution and clarification log,
+GitHub Issue #8, test/runtime configuration and existing T002 evidence.
 
 ## Source of Truth and Setup
 
-Goal: synthetic fixtures and privacy guardrails. Follow the five acceptance rows
-and verification commands in 07-issue-prompt.md. No production code, schema,
-external data, credential, UI, or later Task ID implementation. Owner authorized
-prompt/loop progression; owner resolved legacy Sheet IDs in favor of active-doc
-alias replacement, leaving history for T038. Work from b083174 on
-codex/t002-sanitized-fixture-privacy. Four meaningfully different failed
-remediations maximum; never weaken a gate. Preserve previous ledger rows.
+Goal and acceptance matrix: 07-issue-prompt.md, T003 only. Branch
+codex/t003-identity-sessions from approved c3b19c1. Owner authorized immediate
+prompt/loop progression and reviewed eligible merge; no new artifact approval
+pause. AGENTS.md's four meaningfully different remediation attempts supersede
+the skill's default three cycles. Never weaken checks or decide pending policy.
 
-## Cycle 1 — in progress
+## Cycle 1 — implementation underway
 
-- Build: inspect existing Worker test pool; add fixtures, independent expected
-  totals, privacy tests/scanner and external-network guard; replace legacy IDs.
-- Review: pending. Cover scope, privacy, no production imports in finance oracle,
-  no match echo, clean/bad canaries, fail-closed opaque files and network denial.
-- Tests: npm ci passed (four moderate, no high advisories); focused/full suite
-  and artifact scans pending.
-- Preparation failure: apply_patch rejected a delete/add of the same path;
-  no file was changed by that failed call. Replaced the requested prompt artifact
-  with a single file write. This is not an acceptance-criterion remediation.
-- Decision: continue under owner authorization; implementation not complete.
+- Build: first product identity/session migration, typed rows, disposable D1
+  migration tests and test-only bindings. No live D1 configuration or auth code.
+- Review boundary: five roles, canonical username uniqueness, verifier metadata,
+  flags/lock persistence, digest-only storage, timestamp/FK/uniqueness guards,
+  lookup/revocation indexes, migration rollback/retry; preserve privacy guards.
+- Verification: npm ci passed with four existing moderate advisories. Focused
+  tests plus complete check/test/verify/build/audit/scan gates pending.
+- Decision: continue under owner authority. No T003 criterion is claimed done.
 
-## Stop / Acceptance Conditions
+## Stop Conditions
 
-Every T002 criterion evidenced; all required local/CI checks pass; full current
-PR diff reviewed; no unresolved privacy or human gate; clean merge verified;
-main synchronized; final PR audit/handoff complete before fresh T003 task.
+Every T003 acceptance row passes; full current diff reviewed; all required
+local/CI checks pass; no unresolved T003 human gate; reviewed PR merge verified,
+clean main synchronized and final audit posted. Then stop; do not start T004.
 
 ## Explanation and Limitations
 
-Fixtures describe workflow shape without copying source values. Independent
-literal totals make future calculation tests capable of catching wrong code.
-State-only examples will not decide unresolved finance semantics. Scanner must
-fail on unreadable/opaque artifacts rather than falsely claiming OCR coverage.
-Git-history privacy and actual release evidence remain T038-owned.
+This schema can retain individual account state and revoke stored session
+references. It does not authenticate anyone, implement hashing, select final
+security costs/TTL, provision credentials, or change Deputy administration.
+Bootstrap and one-time delivery remain owner decisions before those behaviors
+are implemented. SQL cannot prove binary input was produced by a secure hash;
+that proof belongs to T008/T009. No UI or protected API changes in this issue.
 
-## Cycle 1 evidence — 2026-09-11 WITA
+## Cycle 1 / remediation attempt 1
 
-- Implemented test-only campus/regional catalog, five state-shape samples,
-  independent literal six-total oracles, corrections, issues, closure evidence,
-  strict synthetic-field checks, scanner CLI/canaries, and native outbound deny.
-- Replaced three legacy Sheet IDs and one tab ID with private aliases in four
-  active documents under owner decision. No external resource was read/written.
-- Scanner attempt 1: an ID at start of text escaped a lookbehind boundary.
-  Expanded boundary; all three initial scanner tests passed.
-- Scanner attempt 2: clean-scan false positives came from package integrity
-  fragments, generated TypeScript identifiers, and raw-shaped test literals.
-  Restricted opaque-ID rule to whole quoted/standalone tokens; assembled the
-  canaries at runtime. Those findings cleared, leaving one field-name suffix.
-- Scanner attempt 3: `badPhone` was mistaken for field `phone`; required a field
-  word boundary. All canaries still pass; clean working-tree/bundle scan passed.
-- Typecheck attempt 1: TypeScript rejected direct equality of disjoint literal
-  unions in an assertion. Changed to an equivalent typed inequality assertion,
-  preserving the behavior; TypeScript checks then passed.
-- Binding-check attempt 1: checkout CRLF differed bytewise from Wrangler's LF
-  generated file. Regenerated with the pinned Wrangler, confirmed no logical
-  generated-type diff, and added a file-specific LF attribute. Check passed.
-- Full checks passed: npm ci; npm run check; npm test (21 Worker + 3 Node cases
-  before final review addition); npm run build (dry-run, ASSETS only);
-  npm audit --audit-level=high (four moderate findings remain); scanner (49 files,
-  zero findings after build); git diff --check. No migrations/UI changed.
-- Final review tightened exclusions to repository-root dependency/cache/history
-  directories only, adding a nested-evidence regression case. Reverification
-  below supersedes prior test counts. No tests were removed, skipped or weakened.
-- Identity checked privately against accepted T001 commit author; present and
-  matching. Refreshed origin/main remains b083174. PR review/merge still pending.
+Initial focused run: 80/82 passed. SQLite GLOB stopped at embedded NUL, allowing
+an invalid username on insert/update. Hypothesis: explicit instr/char(0) guard
+must reject the full text independently of GLOB. Added that guard to the draft
+migration, which has only been applied to disposable test databases. Rerun:
+82/82 passed; npm run check passed, including generated bindings. No test changed
+or weakened. All other acceptance cases, including migration rollback, passed.
 
-## Acceptance review
+The stored login key is lowercase ASCII letters/digits/dot/underscore/hyphen;
+noncanonical input is rejected at SQL rather than silently rewritten. Future
+account/login services must normalize input before persistence/lookup. Version
+is a positive integer with a nonempty JSON parameter object; algorithm-specific
+validation belongs to T008. Timestamp bounds represent UTC epoch milliseconds,
+not a chosen session TTL. No accounts are seeded and no permissions are assigned
+by the migration beyond storing the five approved role values.
 
-All five issue criteria have local implementation/evidence: the fixture-policy
-suite covers shape, independent states, partial/unremitted cases, correction and
-closure; expected-finance.ts and README contain independent literal totals and
-hand calculations; policy/negative tests enforce synthetic fields and invalid
-URLs; scanner uses ordinal/rule-only diagnostics and temporary known-bad
-canaries; network tests exercise native fetch denial for Sheets/Drive public
-hosts without contacting them and test registered synthetic mock success.
-Opaque raster/ZIP/XLSX/PDF files fail closed, not falsely clean. Arbitrary prose
-PII/financial classification and Git history remain limitations for T038; no
-release, live integration, OCR, or production finance gate is claimed here.
+## Complete local verification and acceptance review
 
-## Final local decision — 2026-09-11T12:52:00+08:00
+- npm ci: passed, pins preserved. npm run check: passed. npm run verify:
+  passed; executes check and npm test with fresh disposable migration databases.
+- npm test within verify: 103 Worker tests (82 migration cases) and four Node
+  privacy scanner tests, all passed. No skipped or weakened tests.
+- npm run build: passed, Vite plus Worker dry run; ASSETS is the only binding.
+- npm audit --audit-level=high: passed, four existing moderate advisories remain.
+- npm run scan:sensitive: passed, 54 files and zero findings, including source,
+  config, SQL, test artifacts and both dry-run bundles. git diff --check: passed.
+- Origin remains c3b19c1. Git name/email privately matched approved T002 author.
+- Acceptance: account tests prove all five roles, flags/lock state, canonical
+  uniqueness and version/parameter constraints. Session tests prove column
+  inventory/binary storage, expiry/revocation, orphan/duplicate denial and scoped
+  revocation. Raw inserts AND updates exercise invalid values. PRAGMA/query-plan
+  inspection proves strict tables, FK integrity and indexed lookups/revocation.
+  Separate databases prove fresh empty baseline, no seeded accounts, repeat/no-op,
+  failed-DDL rollback/retry, failed-upgrade preservation and batch rollback.
+- Review: no authentication service, password implementation, bootstrap/delivery
+  decision, account-permission change, UI, order/activity schema, remote binding,
+  real resource, dependency or privacy-boundary change. No T003 human gate is
+  pending: Issue #8's gate applies before fixing bootstrap behavior, which is
+  explicitly absent here. No mobile/direct protected-API behavior changed.
+- Decision: locally accepted for PR review. Current remote head/base/CI/comments,
+  merge, clean-main sync and final PR audit remain required before done.
 
-Accepted for PR review, not yet merged. Complete staged diff reviewed against
-Issue #7 and source context. Production routes, schema, bindings and dependency
-pins remain unchanged. Preserve default Vitest discovery, excluding only the
-Node scanner suite that npm test explicitly executes. Latest npm test passed
-21 Worker tests and 4 Node tests. Final scanner/canary reruns passed; no ignored
-or weakened tests, unexplained findings, unrelated changes or pending T002 human
-gate remain. The initial in-progress status above is historical. GitHub CI,
-current head/base review, merge verification and clean-main audit remain required.
+## Explanation for the owner
 
-## PR review evidence
-
-Implementation d2069e0 was pushed and PR #48 opened against b083174 with Closes #7.
-GitHub Verify run 34563885734 passed all configured steps. PR is our own,
-non-draft, mergeable, and has no outstanding reviews/comments. This evidence
-commit also adds the compact handoff and commit/PR audit. Its final head and
-configured CI must be checked again before merge; the final PR audit comment
-will record the actual merge SHA and clean-main verification without another
-recursive log-only PR. No T003 is created before that evidence is complete.
+The migration makes invalid account/session rows fail at the database boundary,
+including raw SQL writes that bypass application checks. The key correction was
+explicit NUL rejection, which ordinary SQLite pattern matching did not enforce.
+The tests also prove failed multi-step writes leave the earlier state intact.
+Future authentication must validate verifier algorithms/costs and issue/revoke
+sessions correctly; these passing schema tests do not claim login is implemented.
