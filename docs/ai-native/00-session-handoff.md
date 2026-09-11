@@ -96,11 +96,11 @@ signature rows for the committee chair and treasurer at the bottom.
 ## Source Evidence Already Checked
 
 - Existing sales spreadsheet:
-  `1lTf9rrYjOIfH3Cy4nU4_TwXFVOnJjpL-pAd8l08g_6M`
+  `PRIVATE_SALES_TEMPLATE`
 - Committee spreadsheet:
-  `1tZnjivHVhn-dnKbn7cWSeS4V0vLTGzdgKHS5Y48J2ws`
+  `PRIVATE_COMMITTEE_SOURCE`
 - Google Forms response spreadsheet:
-  `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`
+  `PRIVATE_FORM_RESPONSES`
 - Response tab: `Form Responses 1`
 - Observed size during inspection: 145 rows by 15 columns, with a frozen header
   row and response headers through column K.
@@ -156,3 +156,33 @@ Pertahankan seluruh validation/release gate yang belum dibuktikan. Jangan
 menulis fitur, menggunakan data nyata, atau melakukan deployment produksi.
 Berhenti untuk review project owner setelah issue plan selesai.
 ```
+
+## T002 current handoff — 2026-09-11 WITA
+
+This update supersedes the earlier planning-only next-step text for task execution.
+
+- Task: [Issue #7 / T002](https://github.com/Jordyee/CariDana.FILKOM/issues/7).
+  Implementation `d2069e0`, reviewed baseline `b083174`,
+  [PR #48](https://github.com/Jordyee/CariDana.FILKOM/pull/48).
+  Final merge SHA and post-merge evidence belong to the final PR audit comment.
+- Changed: test fixture catalog/independent oracles/privacy/network helpers;
+  artifact scanner; test/build/CI/ignore/line-ending configuration; T002 prompt,
+  loop/action records; owner-approved legacy ID aliases in four active documents.
+- Evidence: clean install, type/binding checks, 21 Worker plus 4 Node tests,
+  dry-run Worker/Vite build, high-severity dependency audit, 49-file clean scan,
+  complete diff/acceptance review; GitHub Verify run 34563885734 passed.
+- Dependency state: T001 merged; T002 is technically evidenced and awaiting its
+  final reviewed merge. No T003 implementation has started in this task.
+- Residual limits: four moderate advisories; opaque raster/ZIP/XLSX/PDF evidence
+  fails closed until safe decoding is added; arbitrary prose/financial PII and
+  Git history require the later T038 release gate. Finance oracles intentionally
+  avoid unresolved prepayment/refund semantics. No real resource was accessed.
+- Owner decision: active documents now use private source aliases; history is
+  handled separately in T038. No secret mapping was added.
+- Authorized next step ONLY after verified merge, clean main and final PR audit:
+  fresh T003 / Issue #8 task/worktree, gpt-6-astra with high reasoning, branch
+  codex/t003-identity-sessions from latest main; identity/session migrations only.
+  Reload all required sources, create issue prompt and loop artifacts without
+  another routine approval pause, and do not start T004. Bootstrap/credential
+  delivery remains a human decision if the migration actually requires fixing
+  that behavior; do not add bootstrap routes/accounts/default credentials.

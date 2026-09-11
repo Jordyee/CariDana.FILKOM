@@ -1,0 +1,2 @@
+# Wrangler checks generated file bytes, including line endings, across hosts.
+worker-configuration.d.ts text eol=lf

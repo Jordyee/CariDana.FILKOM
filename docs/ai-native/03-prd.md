@@ -542,7 +542,7 @@ response during sync review.
   synchronization.
 - **FR-018**: Synchronization MUST show a preview and validate required source
   columns before writing application or Sheet data. The initial mapping MUST
-  target spreadsheet `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`, tab
+  target spreadsheet `PRIVATE_FORM_RESPONSES`, tab
   `Form Responses 1`, and map the verified headers for timestamp, committee
   member, buyer name, buyer phone, map/location link, region, quantity, payment
   method, payment proof, and notes. The ambiguous `Column 1` header MUST be
@@ -825,5 +825,5 @@ response Sheet.
   costs, 150-order activity sizing, report access direction, initial workbook
   format, and architecture ownership.
 - Read-only inspection of Google Forms response spreadsheet
-  `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`, tab `Form Responses 1`, on
+  `PRIVATE_FORM_RESPONSES`, tab `Form Responses 1`, on
   2026-07-21.

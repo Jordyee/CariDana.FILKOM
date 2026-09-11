@@ -32,3 +32,7 @@ pnpm-debug.log*
 # Local Worker state and installed packages for the throwaway compatibility spike
 node_modules/
 .wrangler/
+# Generated test evidence remains in scan scope even though it is not committed.
+test/artifacts/
+test-results/
+playwright-report/
