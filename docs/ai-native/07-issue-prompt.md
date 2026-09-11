@@ -1,66 +1,86 @@
-# Issue Coding Prompt — T003
+# AI Coding Prompt
 
 ## Sources Read
 
-- AGENTS.md; GitHub Issue #8 (including conditional bootstrap checkpoint).
-- docs/ai-native/03-prd.md (US-001/002, FR-001–009, NFR-002/012/026),
-  04-architecture.md (identity model, security, approved Deputy administration),
-  05-issues.md (T003 and adjacent dependencies), 14-project-constitution.md,
-  15-clarification-log.md; existing 07/08 artifacts and 17-agent-action-log.md.
-- package.json, vitest.config.ts, wrangler.jsonc, test configuration and T002
-  fixture/privacy guardrails; installed Cloudflare test-helper declarations.
-- Cloudflare testing configuration and D1 test API documentation:
-  https://developers.cloudflare.com/workers/testing/vitest-integration/test-apis/
+- `AGENTS.md`
+- `docs/ai-native/03-prd.md`
+- `docs/ai-native/04-architecture.md`
+- `docs/ai-native/05-issues.md`
+- `docs/ai-native/14-project-constitution.md`
+- `docs/ai-native/15-clarification-log.md`
+- GitHub Issue #9 (`T004`)
 
-## Goal and Context
+You are working on Issue #9 / T004: Add committee and activity migrations.
 
-Implement only Issue #8 / T003: D1 accounts, persistent lock state and hashed
-session persistence. T001 and T002 are merged; base is c3b19c1 (PR #48).
-Use existing clean branch codex/t003-identity-sessions. No product migrations
-remain after T001, so use migrations/0001_identity_sessions.sql, not the
-backlog's illustrative 0002 filename. Owner authorizes immediate prompt/loop
-progression and eligible reviewed PR merge, then stop without starting T004.
+## Goal
+
+Add the sequential `0002` D1 migration after published `0001_identity_sessions.sql`.
+It must model a controlled division and committee-member master independent of
+login accounts, plus a one-product, one-mode activity setup with integer-rupiah
+planning values, optional purpose-backed costs, and mutually exclusive campus
+or regional configuration.
+
+## Relevant Context
+
+- FR-010 requires committee/division data to remain separate from accounts.
+- FR-012--FR-015 require exactly one product and a `campus` or `regional` mode;
+  campus setup needs pickup point/PIC and regional setup needs area/PIC.
+- FR-013 and NFR-011 require integer rupiah amounts; target quantity is positive
+  and optional additional costs have a non-empty purpose.
+- T004 establishes structural schema only. Authorization routes, assignment
+  scope, activity lifecycle mutability, orders, Sheet/Drive behavior, UI, and
+  calculations are owned by later issues.
 
 ## Files to Inspect First
 
-Read the sources above, src/env.ts, test/worker.spec.ts, test/tsconfig.json,
-.github/workflows/ci.yml and the actual installed migration-helper API.
+- `migrations/0001_identity_sessions.sql`
+- `migrations/README.md`
+- `src/db/schema.ts`
+- `test/db/identity-migration.spec.ts`
+- `test/env.d.ts` and `vitest.config.ts`
 
-## Constraints / Do Not
+## Constraints
 
-Only SQL, schema types, local D1 tests/configuration and scoped documentation.
-Keep all dependency pins, runtime outbound-test denial and privacy gates.
-Do not add auth routes, hashing code, default accounts, credentials, bootstrap,
-activity/order tables, remote bindings, deployments, real data or releases.
-Coordinator and Deputy account-administration approval is preserved; storing
-a role does not implement or change authorization. Bootstrap/delivery decisions
-remain deferred because this migration seeds no account and fixes no such flow.
-Never edit an applied migration. Keep the action ledger append-only.
+- Create a new `migrations/0002_committee_activities.sql`; never edit `0001`.
+- Use strict D1/SQLite tables, explicit foreign keys, integer constraints, and
+  indexes for activity status/period plus division and active-member lookup.
+- Require active committee members for campus/regional PIC attribution and
+  prevent an attributed PIC from becoming inactive.
+- Use synthetic test values only, local disposable Miniflare D1 only, and keep
+  runtime Wrangler configuration ASSETS-only.
+- Keep migration tests compatible with multiple ordered migrations: fresh,
+  prior-version upgrade, repeat/no-op, and deliberate disposable failure/rollback
+  must remain tested.
 
-## Expected Output / Acceptance Mapping
+## Do Not
 
-| Criterion | Evidence |
-| --- | --- |
-| Accounts: normalized unique username, five roles, flags, versioned verifier parameters, failures and lock | Typed rows; valid role/state persistence; raw SQL duplicate, malformed and negative inserts/updates denied. |
-| Sessions: hash only, bounded timestamps, account reference | Digest-only column inventory, binary storage, lifecycle bounds, orphan/duplicate denial. |
-| Constraints reject invalid states | Raw SQL tests bypass all application validation, including null/type/fractional cases. |
-| Lookup and revocation indexes | PRAGMA inspection and query plans for username, active hash lookup and account revocation. |
-| Fresh migration | Apply checked-in SQL to empty disposable local D1; verify empty product tables, upgrade from T001's empty product baseline, repeat/no-op, failure rollback and safe retry. |
+- Do not create accounts, bootstrap credentials, auth routes, orders, UI,
+  generic catalog/multi-tenancy, remote D1 bindings, migrations, or deployment.
+- Do not decide Member/PIC assignment scope (T017) or post-activation activity
+  mutability (T016).
+- Do not add financial calculations beyond storing their inputs.
+
+## Expected Output
+
+- New migration, internal D1 row types, focused migration tests, and concise
+  migration documentation where needed.
+- Constraint tests for negative/fractional values, empty purpose, wrong or
+  duplicate configuration, FK failures, and inactive attribution on insert,
+  update, and deactivation.
 
 ## Verification
 
-npm ci; focused D1 tests; npm run check; npm test; npm run verify (executes local
-migration tests); npm run build (dry run); npm audit --audit-level=high;
-npm run scan:sensitive (source/config/artifacts/both bundles); git diff --check.
-No mobile or protected API behavior changes; those checks apply in later issues.
-Record exact test evidence and limitations, review full diff and current PR
-head/base/comments/CI before merge. No gate is waived.
+Run focused migration tests, then `npm run check`, `npm test`, `npm run verify`,
+`npm run build`, `npm audit --audit-level=high`, and `npm run scan:sensitive`.
+Review the complete diff and run `git diff --check`.
 
-## Loop Handoff / Before You Finish
+## Loop Handoff
 
-Read this saved file, then use run-the-loop and update 08-loop-log.md immediately
-under explicit owner authorization. Four-attempt policy overrides the generic
-skill's three-cycle default. Privately check Git identity; commit/push with T003;
-open PR against main with Closes #8; merge only after complete review/gates.
-Verify merge, fast-forward clean main, post final PR audit and compact T003
-handoff. Do not start T004 or create the next implementation task.
+After the build attempt, use `run-the-loop` with changed files, review findings,
+and test evidence. Limit the implementation loop to T004 only.
+
+## Before You Finish
+
+- Summarize changed files and assumptions.
+- Explain why the constraints do not choose T016/T017 policy.
+- Report verification results and any remaining human gates.

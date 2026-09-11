@@ -5,7 +5,7 @@ the first product migration; the backlog's `0002` filename was illustrative.
 Add subsequent migrations sequentially. Do not edit a published/applied product
 migration to change its meaning.
 
-T003 has no production D1 binding or remote database identifier. `npm run verify`
+T003/T004 have no production D1 binding or remote database identifier. `npm run verify`
 runs the checked-in SQL through Cloudflare's `readD1Migrations` and
 `applyD1Migrations` helpers against disposable local D1 databases in Vitest.
 The focused command is `npx vitest run test/db/identity-migration.spec.ts`.
@@ -38,6 +38,22 @@ No manual remote migration or credential setup is needed for these tests.
   of unrevoked sessions and foreign-key checks on all sessions. RESTRICT prevents
   orphaning sessions when deleting/changing account IDs. No account/session
   retention policy or automated deletion is introduced.
+
+## Committee and activity storage contract
+
+- `0002_committee_activities.sql` follows the published T003 migration. It keeps
+  `divisions` and `committee_members` independent of `accounts`; a committee
+  member is attribution data, never an access grant.
+- An `activities` row has one required product name and one constrained mode.
+  Its integer-rupiah unit prices and optional cost amounts are non-negative;
+  target quantity is positive. Calculation and lifecycle-edit policy remain
+  later service work.
+- Campus and regional configuration live in separate mode-matching tables. SQL
+  prevents a mismatched or dual configuration and requires an active committee
+  member as PIC. An already attributed PIC cannot be deactivated until the
+  configuration changes. This is integrity, not the T017 authorization scope.
+- Status and period indexes support activity setup/read models; division and
+  partial active-member indexes support controlled attribution lookup.
 
 ## Migration evidence boundary
 
