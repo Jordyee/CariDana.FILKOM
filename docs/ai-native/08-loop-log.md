@@ -91,3 +91,13 @@ explicit NUL rejection, which ordinary SQLite pattern matching did not enforce.
 The tests also prove failed multi-step writes leave the earlier state intact.
 Future authentication must validate verifier algorithms/costs and issue/revoke
 sessions correctly; these passing schema tests do not claim login is implemented.
+
+## PR publication and handoff
+
+Committed implementation 1d5c75d, pushed with upstream, opened PR #49 against
+c3b19c1 with Closes #8. Initial remote review confirms our own non-draft PR,
+reviewed head, unchanged base, mergeable state and no review/inline/general
+comments. Verify run 34586384005 is in progress; no CI pass is claimed yet.
+This bounded evidence commit records publication, acceptance and the compact
+handoff. Recheck the complete final head/base, comments and CI after pushing it.
+Final merge and clean-main evidence will close in the final PR audit comment.
