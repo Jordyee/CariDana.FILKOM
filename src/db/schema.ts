@@ -30,3 +30,51 @@ export interface SessionRow {
   expires_at: number;
   revoked_at: number | null;
 }
+
+/** Controlled attribution data; no member row is a login account. */
+export interface DivisionRow {
+  id: string;
+  name: string;
+  active: DatabaseFlag;
+}
+
+export interface CommitteeMemberRow {
+  id: string;
+  display_name: string;
+  division_id: string;
+  active: DatabaseFlag;
+}
+
+export type ActivityMode = "campus" | "regional";
+export type ActivityStatus = "draft" | "active" | "closed";
+
+export interface ActivityRow {
+  id: string;
+  product_name: string;
+  mode: ActivityMode;
+  unit_purchase_price_rp: number;
+  unit_selling_price_rp: number;
+  target_quantity: number;
+  period: string;
+  /** Lifecycle edit rules belong to T016; this is storage only. */
+  status: ActivityStatus;
+}
+
+export interface AdditionalCostRow {
+  id: string;
+  activity_id: string;
+  amount_rp: number;
+  purpose: string;
+}
+
+export interface CampusActivityConfigRow {
+  activity_id: string;
+  pickup_point: string;
+  pic_committee_member_id: string;
+}
+
+export interface RegionalActivityConfigRow {
+  activity_id: string;
+  area_name: string;
+  pic_committee_member_id: string;
+}

@@ -193,33 +193,40 @@ describe("T003 identity/session schema", () => {
 });
 
 describe("T003 migration lifecycle on separate disposable D1 databases", () => {
-  it("upgrades the empty T001 product baseline, seeds nothing and repeats as a no-op", async () => {
+  it("upgrades the T003 product baseline, seeds nothing and repeats as a no-op", async () => {
     const db = env.TEST_UPGRADE_DB;
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name IN ('accounts', 'sessions')").all())
       .toMatchObject({ results: [] });
-    expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual(["0001_identity_sessions.sql"]);
-    await applyD1Migrations(db, env.TEST_MIGRATIONS);
+    expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual([
+      "0001_identity_sessions.sql", "0002_committee_activities.sql",
+    ]);
+    await applyD1Migrations(db, [env.TEST_MIGRATIONS[0]]);
     expect(await count(db, "accounts")).toBe(0);
     expect(await count(db, "sessions")).toBe(0);
     await insert(db, "accounts", account);
     await insert(db, "sessions", session);
+    await applyD1Migrations(db, env.TEST_MIGRATIONS);
     const before = await schema(db);
     for (let retry = 0; retry < 2; retry++) await applyD1Migrations(db, env.TEST_MIGRATIONS);
     expect((await schema(db)).results).toEqual(before.results);
-    expect(await count(db, "d1_migrations")).toBe(1);
+    expect(await count(db, "d1_migrations")).toBe(2);
     expect(await count(db, "accounts")).toBe(1);
     expect(await count(db, "sessions")).toBe(1);
   });
 
   it("rolls back failed DDL and migration bookkeeping, then safely retries the original SQL", async () => {
     const db = env.TEST_ROLLBACK_DB;
-    const original = env.TEST_MIGRATIONS[0];
+    const original = env.TEST_MIGRATIONS[1];
+    await applyD1Migrations(db, [env.TEST_MIGRATIONS[0]]);
     // A deterministic fault after all DDL proves the whole migration rolls back.
     const broken = { ...original, queries: [...original.queries, "INSERT INTO synthetic_missing_table VALUES (1)"] };
     await expect(applyD1Migrations(db, [broken])).rejects.toThrow(/no such table/);
-    expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name IN ('accounts', 'sessions', 'sessions_account', 'sessions_account_active')").all())
-      .toMatchObject({ results: [] });
-    expect(await count(db, "d1_migrations")).toBe(0);
+    const priorObjects = await db.prepare("SELECT name FROM sqlite_schema WHERE name IN ('accounts', 'sessions', 'sessions_account', 'sessions_account_active') ORDER BY name").all<{ name: string }>();
+    expect(priorObjects.results.map((item) => item.name)).toEqual([
+      "accounts", "sessions", "sessions_account", "sessions_account_active",
+    ]);
+    expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'activities'").first()).toBeNull();
+    expect(await count(db, "d1_migrations")).toBe(1);
     await applyD1Migrations(db, env.TEST_MIGRATIONS);
     await insert(db, "accounts", account);
     await insert(db, "sessions", session);
@@ -229,7 +236,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
       "UPDATE sessions SET account_id = 'synthetic-orphan'",
     ] };
     await expect(applyD1Migrations(db, [brokenUpgrade])).rejects.toThrow(/FOREIGN KEY/);
-    expect(await count(db, "d1_migrations")).toBe(1);
+    expect(await count(db, "d1_migrations")).toBe(2);
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'synthetic_upgrade_probe'").first()).toBeNull();
     expect(await db.prepare("SELECT failure_count FROM accounts").first("failure_count")).toBe(0);
     expect(await count(db, "sessions")).toBe(1);
