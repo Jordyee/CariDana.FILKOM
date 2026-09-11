@@ -78,3 +78,78 @@ export interface RegionalActivityConfigRow {
   area_name: string;
   pic_committee_member_id: string;
 }
+
+/** Internal order persistence; sensitive fields must never be returned as a raw DTO. */
+export type OrderSourceType = "manual" | "form_sync";
+
+export interface OrderRow {
+  /** Immutable application identifier, never a Sheet row identity. */
+  order_id: string;
+  activity_id: string;
+  source_type: OrderSourceType;
+  buyer_name: string;
+  buyer_phone: string | null;
+  buyer_address: string | null;
+  buyer_map_reference: string | null;
+  attributed_committee_member_id: string | null;
+  attributed_division_id: string | null;
+  attribution_note: string | null;
+  regional_area: string | null;
+  pickup_point: string | null;
+  assigned_pic_committee_member_id: string;
+  quantity: number;
+  payment_method: string;
+  /** Drive-reference metadata only; no binary proof field exists. */
+  payment_proof_reference: string | null;
+  payment_proof_filename: string | null;
+  payment_proof_mime_type: string | null;
+  notes: string | null;
+  created_by_account_id: string;
+  /** UTC epoch milliseconds. */
+  created_at: number;
+}
+
+export type OrderState = "pending_confirmation" | "confirmed" | "cancelled";
+export type PaymentState = "unpaid" | "partially_paid" | "paid";
+export type FulfillmentState =
+  | "not_processed"
+  | "assigned_or_carried_by_pic"
+  | "received_by_buyer"
+  | "problematic";
+export type RemittanceState = "not_remitted" | "remitted" | "audited";
+
+export interface OrderStateHistoryRow {
+  id: string;
+  order_id: string;
+  state: OrderState;
+  actor_account_id: string;
+  occurred_at: number;
+}
+
+/** An append-only, non-negative integer-rupiah collection event. */
+export interface PaymentHistoryRow {
+  id: string;
+  order_id: string;
+  state: PaymentState;
+  amount_collected_rp: number;
+  actor_account_id: string;
+  occurred_at: number;
+}
+
+export interface FulfillmentHistoryRow {
+  id: string;
+  order_id: string;
+  state: FulfillmentState;
+  actor_account_id: string;
+  occurred_at: number;
+}
+
+/** An append-only, non-negative integer-rupiah PIC remittance event. */
+export interface RemittanceHistoryRow {
+  id: string;
+  order_id: string;
+  state: RemittanceState;
+  amount_remitted_rp: number;
+  actor_account_id: string;
+  occurred_at: number;
+}
