@@ -96,11 +96,11 @@ signature rows for the committee chair and treasurer at the bottom.
 ## Source Evidence Already Checked
 
 - Existing sales spreadsheet:
-  `1lTf9rrYjOIfH3Cy4nU4_TwXFVOnJjpL-pAd8l08g_6M`
+  `PRIVATE_SALES_TEMPLATE`
 - Committee spreadsheet:
-  `1tZnjivHVhn-dnKbn7cWSeS4V0vLTGzdgKHS5Y48J2ws`
+  `PRIVATE_COMMITTEE_SOURCE`
 - Google Forms response spreadsheet:
-  `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`
+  `PRIVATE_FORM_RESPONSES`
 - Response tab: `Form Responses 1`
 - Observed size during inspection: 145 rows by 15 columns, with a frozen header
   row and response headers through column K.

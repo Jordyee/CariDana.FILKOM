@@ -6,9 +6,11 @@
   "type": "module",
   "scripts": {
     "build:client": "vite build",
-    "build": "npm run build:client && wrangler deploy --dry-run",
+    "build": "npm run build:client && wrangler deploy --dry-run --outdir dist/worker",
     "check": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.client.json && tsc --noEmit -p test/tsconfig.json && wrangler types --check",
-    "test": "npm run build:client && vitest run",
+    "test": "npm run build:client && vitest run && npm run test:privacy-scan",
+    "test:privacy-scan": "node --test test/privacy/artifact-scan.test.mjs",
+    "scan:sensitive": "node scripts/scan-sensitive-artifacts.mjs",
     "test:watch": "vitest",
     "verify": "npm run check && npm run test"
   },

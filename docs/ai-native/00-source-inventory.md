@@ -11,7 +11,7 @@
 ## Google Sheets Source: Sales Template
 
 - Title: `Tempelate penjualn`
-- Spreadsheet ID: `1lTf9rrYjOIfH3Cy4nU4_TwXFVOnJjpL-pAd8l08g_6M`
+- Spreadsheet ID: `PRIVATE_SALES_TEMPLATE`
 - Time zone: `Asia/Makassar`
 - Status: readable through Google Sheets connector.
 
@@ -37,7 +37,7 @@
 ## Google Sheets Source: Committee Data
 
 - Title: `Copy of Struktur Panitia Filkom Day 2026`
-- Spreadsheet ID: `1tZnjivHVhn-dnKbn7cWSeS4V0vLTGzdgKHS5Y48J2ws`
+- Spreadsheet ID: `PRIVATE_COMMITTEE_SOURCE`
 - Status: readable through Google Sheets connector.
 
 ### Verified Tabs
@@ -68,10 +68,10 @@ and careful handling of exports.
 ## Google Forms Response Source
 
 - Title: `cardan nasi jaha`
-- Spreadsheet ID: `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`
+- Spreadsheet ID: `PRIVATE_FORM_RESPONSES`
 - Status: readable through the Google Sheets connector; inspected read-only on
   2026-07-21.
-- Tab: `Form Responses 1` (`sheetId` 328013160)
+- Tab: `Form Responses 1` (`sheetId` PRIVATE_FORM_RESPONSE_TAB)
 - Grid: 145 rows x 15 columns; header row frozen.
 - Verified header categories: timestamp, committee member, buyer name, buyer
   phone, map/location, region, quantity, payment method, payment proof, notes,

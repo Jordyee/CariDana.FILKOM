@@ -1,151 +1,68 @@
-# AI Coding Prompt
+# Issue Coding Prompt — T002
 
 ## Sources Read
 
-- `AGENTS.md`
-- `docs/ai-native/03-prd.md`
-- `docs/ai-native/04-architecture.md`
-- `docs/ai-native/05-issues.md`
-- GitHub Issue #6, `T001: Turn the accepted spike into a safe product foundation`
+- AGENTS.md; docs/ai-native/03-prd.md; 04-architecture.md; 05-issues.md;
+  14-project-constitution.md; 15-clarification-log.md (all read in full).
+- docs/ai-native/16-artifact-analysis.md (H1, H8), 00-source-inventory.md
+  (local metadata, redacted), 17-agent-action-log.md.
+- GitHub Issue #7; package.json; vitest.config.ts; test/worker.spec.ts;
+  test/tsconfig.json; .gitignore; .github/workflows/ci.yml.
 
-You are working on GitHub Issue #6 / Task ID **T001**: **Turn the accepted spike
-into a safe product foundation**. This is the only implementation issue in
-scope. Do not begin T002 or any later task.
+## Goal and Context
 
-## Goal
-
-Replace the accepted, synthetic compatibility-spike scaffold with the smallest
-safe production-shaped foundation for CariDana.FILKOM. Retain the owner-approved
-pinned stack—TypeScript, Hono, one Cloudflare Worker, D1, a Vite-built static
-client, and `write-excel-file@4.1.1`—while ensuring throwaway probe behavior and
-the isolated spike D1 identity cannot be exposed by a product configuration.
-
-## Relevant Context
-
-- NFR-023 requires one full-stack Cloudflare Worker with static assets and API
-  routes, backed by D1. NFR-025 requires business code to remain independently
-  testable from UI rendering. NFR-026 requires reproducible versioned SQL
-  migrations.
-- The client must be a pinned Vite static build served by the same Worker; SSR,
-  a second application server, microservices, an ORM, and another storage
-  service are outside the approved architecture.
-- The spike was accepted only as a sanitized compatibility proof. Its synthetic
-  probe routes, schema, and isolated D1 configuration are not product runtime
-  behavior. Preserve historical evidence only where it cannot be deployed or
-  imported into a product configuration.
-- No production database identity, Google credential, session secret, buyer
-  data, proof reference, real spreadsheet identity, or sensitive financial data
-  may enter source, tests, logs, generated bundles, commits, PR text, or the
-  action log. Use only clearly synthetic data.
-- Do not add product features, migrations beyond what is strictly needed for
-  safe scaffold isolation, auth behavior, order behavior, Sheet integration,
-  Drive access, report lifecycle, or T002 privacy fixtures. Those belong to
-  later tasks.
+Implement only GitHub Issue #7 / T002: synthetic Nasi Jaha-shaped fixtures and
+privacy guardrails (NFR-003, NFR-008, SC-006, SC-010, AC-010). T001 merged via
+PR #47 at b083174. Regional fixtures describe later workflow, not new features.
+Owner authorizes autonomous prompt/loop progression and reviewed PR merge.
+On 2026-09-11 WITA owner approved replacing real Sheet IDs in active planning
+documents with private aliases; Git history is handled separately at T038.
+This resolves the T002 privacy checkpoint without authorizing real-data access.
 
 ## Files to Inspect First
 
-- `package.json` and `package-lock.json`
-- `wrangler.jsonc`, `worker-configuration.d.ts`, `tsconfig.json`, and
-  `vitest.config.ts`
-- `src/index.ts`, `src/auth.ts`, `src/workbook.ts`, `public/index.html`,
-  `test/worker.spec.ts`, and `migrations/0001_spike_probe.sql`
-- `docs/ai-native/16-stack-compatibility-spike.md` and
-  `docs/ai-native/17-agent-action-log.md`
-- Any generated Vite/Worker binding output and any CI workflow location before
-  modifying it
+Read the sources above, test/build configuration, Worker entry point, and CI.
+Process legacy identifiers locally with redacted/count-only output.
 
-## Constraints
+## Constraints / Do Not
 
-- Work from a fresh `codex/t001-safe-product-foundation` branch based on the
-  latest approved `main`, after first checking branch, upstream divergence,
-  working-tree changes, and configured Git identity without exposing the email.
-- Keep the accepted versions of Hono, Wrangler, TypeScript, the Cloudflare
-  Worker Vitest pool, and `write-excel-file@4.1.1` exactly pinned. A dependency
-  or compatibility-date change requires an owner-reviewed spike amendment; do
-  not make one.
-- Use one Worker to serve both `/api/*` and Vite static assets. Keep Worker code
-  Web-standard and route policy/business modules testable without rendering.
-- Treat the current isolated spike database identity as historical sensitive
-  evidence: remove it from any deployable product configuration, do not repeat
-  it in replacement files, test output, action-log rows, commits, or PR text,
-  and do not access it remotely.
-- Keep the implementation narrowly T001-scoped. Preserve unrelated user work
-  and prior action-log rows. Add only append-only action-log entries with WITA
-  timestamps and redacted evidence.
-- Required checks are `npm ci`, `npm run check`, `npm test`, `npm run build`,
-  and `npm audit --audit-level=high`. Inspect the dry-run bundle and generated
-  binding types, and scan product configuration/bundles for spike identifiers
-  and secret-shaped values without echoing matches.
-- Treat any failed gate through the four-attempt policy. Do not weaken tests,
-  suppress audits, claim a failed command passed, deploy, run remote D1
-  commands, write a Sheet, or use real external systems.
+- Branch codex/t002-sanitized-fixture-privacy from latest approved main.
+- Preserve pins and existing tests; no schema/auth/UI/integration or later issue.
+- Synthetic names/contact/address sentinels, .invalid evidence URLs, synthetic
+  source IDs, and invented integer rupiah only. Manual orders have no Sheet row.
+- Four separate axes; independent literal finance expectations, no production
+  calculation imports. Do not decide unresolved prepayment/refund/assignment
+  semantics; distinguish state-shape examples from unambiguous finance samples.
+- Scanner must not echo matches or unsafe filenames. Opaque formats fail closed
+  until inspected; do not claim text scanning reads screenshot pixels.
+- Deny external test network access; use in-memory reserved-invalid mocks only.
+- No real Sheet/Drive/credentials, deployment, remote migration, release, paid
+  resource, or history rewrite. Action log is append-only.
 
-## Do Not
+## Expected Output / Acceptance Mapping
 
-- Do not implement T002, authentication, schema/model work, manual orders,
-  Sheets, Drive, reports, or a new feature merely because a directory exists.
-- Do not publish a release, deploy, run a remote migration, access the isolated
-  spike D1 database, create a Cloudflare resource, or use a real credential.
-- Do not introduce unpinned dependencies, SSR, Node-only Worker assumptions,
-  another backend, another database, or an ORM.
-- Do not leave a deployable probe endpoint, a product-configured spike D1
-  identifier, a placeholder secret, or a real-looking external ID in the
-  product path.
-
-## Expected Output
-
-- Product-named package metadata, commands, entry points, Worker/static-client
-  composition, typed bindings, and CI workflow that make the approved
-  foundation explicit.
-- A pinned Vite static-client build whose generated output is served by the
-  same Worker, with focused Worker/runtime tests.
-- Isolated or removed throwaway probes and spike-only D1 configuration so they
-  cannot be selected by a production configuration.
-- A clean separation between bootstrap/runtime code and any retained historical
-  compatibility evidence, with no sensitive identifier copied into product
-  artifacts.
-- Append-only action-log evidence, one reviewable T001 commit, a PR against
-  `main` that includes `Closes #6`, and an audit-ready acceptance mapping.
-
-## Acceptance Mapping
-
-| Acceptance criterion | Required evidence |
+| T002 criterion | Required evidence |
 | --- | --- |
-| Product metadata, commands, and entry points describe CariDana.FILKOM | Review `package.json`, commands, Worker/client entry points, and focused tests. |
-| Accepted stack remains pinned | Compare manifest and lockfile exact versions; explain any proposed change as a hard stop. |
-| Pinned Vite static client is served by the same Worker, with no SSR/second server | Inspect Vite config/build output and Worker asset routing; run build and Worker tests. |
-| Probe routes and isolated spike D1 identity cannot be exposed in production | Configuration/source/bundle scan with redacted results; direct route/config tests where applicable. |
-| CI covers install, type/binding check, Worker tests, dry-run build, and dependency audit without secrets | Inspect/add CI workflow and scripts; verify commands use no credentials. |
-| Bindings are typed and no sensitive product data/config is committed | Run binding-type generation/check and redacted scan of tracked product configuration and generated bundle. |
+| Campus/regional, four axes, partial payment, remittance, issues, correction, closure | Typed fixture catalog, structural/coverage tests, inspection of audit fields. |
+| Six independent finance totals | Literal expected-finance.ts; documented hand arithmetic and independent consistency checks. |
+| Synthetic sensitive fields and invalid evidence domains | Strict fixture-policy tests and synthetic negative canaries; legacy ID alias replacement. |
+| Repeatable redacted artifact scan | CLI; clean and temporary bad tests for fixtures/logs/screenshots/exports; fail closed on opaque formats. |
+| No real Sheets/Drive network | Default Worker outbound denial, safe mock helper, local denial/mock-success tests. |
 
 ## Verification
 
-1. Run `npm ci` from a clean dependency state.
-2. Run `npm run check` and inspect generated Worker binding types.
-3. Run `npm test` in the Worker runtime.
-4. Run `npm run build` as a dry-run only; inspect the output for static assets,
-   expected routes, and absence of probe/sensitive configuration.
-5. Run `npm audit --audit-level=high`; any findings remain a failing gate until
-   safely resolved within T001 or reported under the four-attempt policy.
-6. Run `git diff --check`, review the complete diff, inspect CI configuration,
-   and run a redacted configuration/bundle scan for spike identifiers and
-   secret-shaped values.
-7. Before merge, map every criterion above to passing test, inspection, or an
-   explicitly pending external/human item. Review the PR head/base/comments and
-   configured checks; merge only when all AGENTS.md gates pass.
+Run npm ci; focused fixture/scanner/network tests; npm run check; npm test;
+npm run build (dry-run); npm audit --audit-level=high; configuration/source/
+fixture/log/artifact/client-and-Worker-bundle scan; git diff --check and full
+review. No migration/UI edits: those specialized checks are not applicable.
+Require all configured CI checks and reviewed current PR head/base.
 
-## Loop Handoff
+## Loop Handoff / Before You Finish
 
-After owner acceptance of this prompt, use `run-the-loop` for the bounded T001
-build, review, test, fix, PR, and merge cycle. Record every material
-state-changing action and verification result in the append-only action log.
-Stop after the T001 handoff; T002 requires a fresh task.
-
-## Before You Finish
-
-- Summarize changed files and explain any assumptions.
-- Report every verification command with its actual result and concise redacted
-  evidence.
-- Identify residual risk, including any baseline dependency or binding failure.
-- Confirm no T002-or-later implementation was included and no external system
-  was touched.
+Use run-the-loop immediately, without another artifact approval pause, per
+owner authorization. Save 08-loop-log.md; append WITA action/failure evidence.
+Four-attempt policy applies. Verify Git identity privately, commit/push passing
+T002 changes, open PR with Closes #7, review all gates, then merge with merge
+commit if eligible. Verify merge, synchronize clean main, and post final PR audit.
+Only afterward create fresh T003 task with gpt-6-astra/high; identity/session
+migrations only, reload all sources, no T004. Report evidence and limitations.

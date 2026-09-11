@@ -13,7 +13,7 @@ remain approved; Q4-Q5 below are the only reopened product questions.
   criteria, risks, and validation questions.
 - Project-owner answers received on 2026-07-21.
 - Read-only metadata and header inspection of spreadsheet
-  `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`, tab `Form Responses 1`.
+  `PRIVATE_FORM_RESPONSES`, tab `Form Responses 1`.
 
 ## Ambiguity Scan Summary
 
@@ -31,7 +31,7 @@ remain approved; Q4-Q5 below are the only reopened product questions.
 
 | # | Question | Why It Matters | Recommended Default | Student Answer |
 | --- | --- | --- | --- | --- |
-| Q1 | Please provide the Google Forms response Sheet URL and exact response-tab name. Is it acceptable for the application to add and write only a rightmost `Order ID` column? | The existing sales template is not enough to verify actual form headers, required field mapping, and whether repeated form submissions preserve the added ID column. | Inspect the real Sheet read-only first; test the ID behavior on a copy; write only the `Order ID` column after explicit approval. | Resolved: supplied spreadsheet `1HmC15FBgAm5H9hx1668aBtrgQl5Ol3t4aTk_zPBmY6g`; verified tab `Form Responses 1`, 15-column grid, frozen header row, and form-response headers through current column K. Current L is the candidate ID position, but runtime mapping uses the `Order ID` header rather than a fixed letter. No source data was edited. |
+| Q1 | Please provide the Google Forms response Sheet URL and exact response-tab name. Is it acceptable for the application to add and write only a rightmost `Order ID` column? | The existing sales template is not enough to verify actual form headers, required field mapping, and whether repeated form submissions preserve the added ID column. | Inspect the real Sheet read-only first; test the ID behavior on a copy; write only the `Order ID` column after explicit approval. | Resolved: supplied spreadsheet `PRIVATE_FORM_RESPONSES`; verified tab `Form Responses 1`, 15-column grid, frozen header row, and form-response headers through current column K. Current L is the candidate ID position, but runtime mapping uses the `Order ID` header rather than a fixed letter. No source data was edited. |
 | Q2 | Is the treasurer a separate report-only user role/account, and should the deputy retain the same generate/download permission as the coordinator? | This changes authentication roles, server authorization, interface actions, and acceptance tests. | Coordinator and deputy may generate/download; Officer and Treasurer may download the closed report only; Member/PIC may not export. Officer/Treasurer receive no buyer PII or raw proof links in operational views, but the closed workbook may include approved evidence links required for validation. | Resolved: recommended permission split accepted. Treasurer is report-only; Deputy retains coordinator-level report generation/download; Officer and Treasurer download closed reports only. |
 | Q3 | If manual order creation is deferred, must every MVP order—including campus pickup—first come from Google Form/Sheet, with PICs only finding and updating synchronized orders? | US-005, US-007, SC-002, and T019 currently assume an operator can create a manual order. Deferring it changes the approved P1 campus flow and acceptance tests. | Keep manual entry in P1 with immutable IDs and idempotency; prefer Form intake without making it mandatory. Never auto-merge a later Form response with a manual order. | Resolved on 2026-09-02: PICs, Coordinator, and Deputy may create manual orders. Form intake is preferred but not mandatory. Manual creation must avoid duplicate submission and a later possible Form match requires explicit Coordinator/Deputy review rather than automatic merge. |
 | Q4 | What assignment determines which orders a Member/PIC may see and update: explicit order assignment, all orders in an assigned activity, or all orders in an assigned region/PIC queue? | This changes database relationships, authorization queries, privacy tests, and day-to-day workload. | Use explicit order/PIC assignment; regional PICs additionally see orders in their assigned queue only. Coordinator/Deputy retain full access. | Pending. Owner requested a simpler explanation before deciding. |
@@ -126,8 +126,9 @@ will be required before the stack is accepted.
 - Decide before T005-T007 the minimum data-retention policy and the exact
   financial/refund/remittance semantics that affect persistence.
 - Decide during T001 whether English is part of P1 or a later enhancement.
-- Decide before T002 whether tracked planning documents may retain real Sheet
-  identifiers or must replace them with private aliases.
+- Resolved for T002 on 2026-09-11 WITA: owner approved replacing real Sheet
+  identifiers in active planning documents with private aliases. Git history
+  is handled separately at T038; no history rewrite is authorized here.
 
 Downstream evidence still required:
 
@@ -137,3 +138,12 @@ Downstream evidence still required:
 - Define or remove the ambiguous `Column 1` form field before production mapping.
 - Verify role authorization tests for Coordinator, Deputy, Member/PIC, Officer,
   and Treasurer.
+
+## T002 owner decision — 2026-09-11 WITA
+
+The owner approved replacing real Sheet identifiers in active tracked planning
+files with private aliases. `PRIVATE_SALES_TEMPLATE`, `PRIVATE_COMMITTEE_SOURCE`,
+`PRIVATE_FORM_RESPONSES`, and `PRIVATE_FORM_RESPONSE_TAB` describe source roles;
+they are not usable external IDs and contain no secret mapping. Real targets
+must be supplied privately only at their explicitly authorized integration gate.
+Git-history privacy remains T038; T002 does not rewrite history or grant access.

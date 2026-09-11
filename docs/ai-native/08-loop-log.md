@@ -1,172 +1,98 @@
-# Loop Plan for Issue #6 / T001
+# Loop Log — Issue #7 / T002
 
 ## Sources Read
 
-- `AGENTS.md`
-- `docs/ai-native/05-issues.md`
-- `docs/ai-native/07-issue-prompt.md`
+AGENTS.md; docs/ai-native/05-issues.md; docs/ai-native/07-issue-prompt.md,
+plus PRD, architecture, constitution, clarification and artifact-analysis notes.
 
-## Source of Truth
+## Source of Truth and Setup
 
-**Issue:** GitHub Issue #6 / T001 — Turn the accepted spike into a safe product
-foundation.
+Goal: synthetic fixtures and privacy guardrails. Follow the five acceptance rows
+and verification commands in 07-issue-prompt.md. No production code, schema,
+external data, credential, UI, or later Task ID implementation. Owner authorized
+prompt/loop progression; owner resolved legacy Sheet IDs in favor of active-doc
+alias replacement, leaving history for T038. Work from b083174 on
+codex/t002-sanitized-fixture-privacy. Four meaningfully different failed
+remediations maximum; never weaken a gate. Preserve previous ledger rows.
 
-**Goal:** Turn the accepted synthetic compatibility spike into the smallest safe
-production-shaped CariDana.FILKOM foundation, retaining the accepted pinned
-stack while making spike-only routes and the isolated D1 identity impossible to
-expose through product configuration.
+## Cycle 1 — in progress
 
-**Acceptance Criteria:**
+- Build: inspect existing Worker test pool; add fixtures, independent expected
+  totals, privacy tests/scanner and external-network guard; replace legacy IDs.
+- Review: pending. Cover scope, privacy, no production imports in finance oracle,
+  no match echo, clean/bad canaries, fail-closed opaque files and network denial.
+- Tests: npm ci passed (four moderate, no high advisories); focused/full suite
+  and artifact scans pending.
+- Preparation failure: apply_patch rejected a delete/add of the same path;
+  no file was changed by that failed call. Replaced the requested prompt artifact
+  with a single file write. This is not an acceptance-criterion remediation.
+- Decision: continue under owner authorization; implementation not complete.
 
-- [ ] Package metadata, commands, and entry points identify CariDana.FILKOM,
-  rather than a deployable spike.
-- [ ] Hono, Wrangler, TypeScript, the Worker test pool, and
-  `write-excel-file@4.1.1` remain at their accepted pinned versions.
-- [ ] A pinned Vite static client is built without SSR or another application
-  server and is served by the same Worker.
-- [ ] Synthetic probe routes and the isolated spike D1 identity cannot be
-  exposed by a production configuration.
-- [ ] CI covers clean lockfile install, type/binding checking, Worker-runtime
-  tests, dry-run build, and dependency audit without secrets.
-- [ ] Environment bindings are typed and no production resource ID, credential,
-  session secret, or buyer data is committed.
+## Stop / Acceptance Conditions
 
-**Constraints:**
+Every T002 criterion evidenced; all required local/CI checks pass; full current
+PR diff reviewed; no unresolved privacy or human gate; clean merge verified;
+main synchronized; final PR audit/handoff complete before fresh T003 task.
 
-- One fresh `codex/t001-safe-product-foundation` branch from current approved
-  `main`; check upstream, working tree, and configured Git identity first.
-- Keep the approved stack and exact accepted dependency/compatibility versions.
-- Use one Worker with Vite static assets; Web-standard Worker code only.
-- Preserve unrelated work and append redacted WITA evidence to the action log.
-- Use synthetic data only. Do not deploy, run remote D1 commands, access the
-  spike D1 database, write Sheets, use Drive, or use credentials.
+## Explanation and Limitations
 
-**Do Not Change:**
+Fixtures describe workflow shape without copying source values. Independent
+literal totals make future calculation tests capable of catching wrong code.
+State-only examples will not decide unresolved finance semantics. Scanner must
+fail on unreadable/opaque artifacts rather than falsely claiming OCR coverage.
+Git-history privacy and actual release evidence remain T038-owned.
 
-- T002 or later scope, including privacy fixtures, auth, product schema, orders,
-  Sheet/Drive integration, report lifecycle, or weak-network drafts.
-- The stack, dependency pins, compatibility date, security/privacy boundary, or
-  product architecture without an owner-reviewed amendment.
-- Existing action-log history, shared Git history, real external systems, or
-  production resources.
+## Cycle 1 evidence — 2026-09-11 WITA
 
-## Loop Setup
+- Implemented test-only campus/regional catalog, five state-shape samples,
+  independent literal six-total oracles, corrections, issues, closure evidence,
+  strict synthetic-field checks, scanner CLI/canaries, and native outbound deny.
+- Replaced three legacy Sheet IDs and one tab ID with private aliases in four
+  active documents under owner decision. No external resource was read/written.
+- Scanner attempt 1: an ID at start of text escaped a lookbehind boundary.
+  Expanded boundary; all three initial scanner tests passed.
+- Scanner attempt 2: clean-scan false positives came from package integrity
+  fragments, generated TypeScript identifiers, and raw-shaped test literals.
+  Restricted opaque-ID rule to whole quoted/standalone tokens; assembled the
+  canaries at runtime. Those findings cleared, leaving one field-name suffix.
+- Scanner attempt 3: `badPhone` was mistaken for field `phone`; required a field
+  word boundary. All canaries still pass; clean working-tree/bundle scan passed.
+- Typecheck attempt 1: TypeScript rejected direct equality of disjoint literal
+  unions in an assertion. Changed to an equivalent typed inequality assertion,
+  preserving the behavior; TypeScript checks then passed.
+- Binding-check attempt 1: checkout CRLF differed bytewise from Wrangler's LF
+  generated file. Regenerated with the pinned Wrangler, confirmed no logical
+  generated-type diff, and added a file-specific LF attribute. Check passed.
+- Full checks passed: npm ci; npm run check; npm test (21 Worker + 3 Node cases
+  before final review addition); npm run build (dry-run, ASSETS only);
+  npm audit --audit-level=high (four moderate findings remain); scanner (49 files,
+  zero findings after build); git diff --check. No migrations/UI changed.
+- Final review tightened exclusions to repository-root dependency/cache/history
+  directories only, adding a nested-evidence regression case. Reverification
+  below supersedes prior test counts. No tests were removed, skipped or weakened.
+- Identity checked privately against accepted T001 commit author; present and
+  matching. Refreshed origin/main remains b083174. PR review/merge still pending.
 
-**Prompt to use:** `docs/ai-native/07-issue-prompt.md`.
+## Acceptance review
 
-**Initial files to inspect:**
+All five issue criteria have local implementation/evidence: the fixture-policy
+suite covers shape, independent states, partial/unremitted cases, correction and
+closure; expected-finance.ts and README contain independent literal totals and
+hand calculations; policy/negative tests enforce synthetic fields and invalid
+URLs; scanner uses ordinal/rule-only diagnostics and temporary known-bad
+canaries; network tests exercise native fetch denial for Sheets/Drive public
+hosts without contacting them and test registered synthetic mock success.
+Opaque raster/ZIP/XLSX/PDF files fail closed, not falsely clean. Arbitrary prose
+PII/financial classification and Git history remain limitations for T038; no
+release, live integration, OCR, or production finance gate is claimed here.
 
-- `package.json`, `package-lock.json`, `wrangler.jsonc`, `tsconfig.json`,
-  `vitest.config.ts`, and `worker-configuration.d.ts`
-- `src/index.ts`, `src/auth.ts`, `src/workbook.ts`, `public/index.html`,
-  `test/worker.spec.ts`, and `migrations/0001_spike_probe.sql`
-- `docs/ai-native/16-stack-compatibility-spike.md`, existing CI configuration,
-  and `docs/ai-native/17-agent-action-log.md`
+## Final local decision — 2026-09-11T12:52:00+08:00
 
-**Verification commands/manual checks:**
-
-- `npm ci`
-- `npm run check`
-- `npm test`
-- `npm run build` (dry run only)
-- `npm audit --audit-level=high`
-- generated-binding and dry-run-bundle inspection
-- redacted source/configuration/bundle scans for spike and secret-shaped values
-- `git diff --check`, full diff review, CI workflow review, and PR head/base
-  review
-
-**Loop limit:** Three build/review cycles under this learning loop. The binding
-AGENTS.md four-attempt policy still governs distinct verification remediations;
-after its fourth failed attempt, stop and report rather than make a fifth.
-
-## Cycle Log
-
-### Cycle 1
-
-**Build Attempt:**
-
-- Prompt used: `docs/ai-native/07-issue-prompt.md`
-- Files changed: Product package/build scripts and lockfile; Worker/assets and
-  generated binding types; Vite client and browser typecheck; Worker tests; CI;
-  ignore rules; prompt/loop/action-log artifacts. Retired spike-only source,
-  static asset, and migration files were removed from the product path.
-- AI assumptions: The current merged `main` was the approved baseline after an
-  upstream refresh. The owner approved `vite@8.3.0` before it was added. The
-  existing compatibility-evidence document and Git history preserve the
-  historical spike evidence without retaining it in product configuration.
-
-**Review Result:**
-
-- Status: Pass, pending the final GitHub PR head/base review.
-- Findings: The initial browser/client typecheck lacked DOM libraries and the
-  replaced Worker test retained two obsolete closing lines. A dedicated client
-  TypeScript configuration and focused test cleanup fixed both. The inherited
-  client exclusion then caused one no-input check failure; overriding that
-  exclusion resolved it. Audit initially had five high findings through pinned
-  Worker tooling; exact transitive `sharp` and `undici` overrides removed all
-  high findings without changing the accepted direct pins.
-
-**Test Result:**
-
-- Commands/checks run: `npm ci`, `npm run check`, `npm test`, `npm run build`,
-  `npm audit --audit-level=high`, generated-binding inspection, dry-run bundle
-  inspection, configuration/bundle scans, `git diff --check`, and complete
-  local diff review.
-- Evidence: clean install passed; type/binding checks passed; five Worker
-  runtime tests passed; Vite built three static assets; Worker dry-run exposed
-  only the `ASSETS` binding; high-severity audit passed with four moderate
-  findings remaining in accepted direct dependencies; all redacted runtime,
-  bundle, and secret-shaped scans passed.
-- Failures: Attempt 1 found missing browser DOM types and stale test syntax.
-  Attempt 2 corrected the inherited client exclusion; all targeted checks then
-  passed. The high-severity dependency finding was remediated with scoped
-  transitive overrides and rechecked successfully.
-
-**Decision:**
-
-- [x] Accept for PR review
-- [ ] Continue with fix prompt
-- [ ] Rollback
-- [ ] Split issue
-- [ ] Ask for help
-
-### Cycle 2
-
-Reserved only if Cycle 1 has a scoped review or verification finding.
-
-### Cycle 3
-
-Reserved only if Cycle 2 has a scoped review or verification finding.
-
-## Stop Conditions
-
-The loop can stop only when:
-
-- [x] Every T001 acceptance criterion maps to passing automated or inspection
-  evidence.
-- [x] All required commands have passed; failed baseline issues are either
-  safely resolved in T001 or cause the required hard stop.
-- [x] Review finds no scope, security, privacy, migration, dependency, secret,
-  or unrelated-change concern.
-- [x] Product configuration cannot expose the spike behavior or isolated D1
-  identity, and scans report results without echoing sensitive matches.
-- [ ] The complete PR gate in `AGENTS.md` passes, including clean head/base,
-  checks, diff, and action-log evidence.
-- [ ] The final handoff explains the change, evidence, residual risk, and that
-  T002 has not begun.
-
-## Final Student Explanation
-
-I will accept the change only when the production-shaped foundation is
-demonstrably separate from the throwaway spike, all required T001 gates pass,
-and the reviewed PR contains no sensitive or out-of-scope work.
-
-The most important expected change is the safe Worker/Vite/configuration
-boundary that preserves accepted pins while preventing spike deployment.
-
-The verification evidence will be the complete clean-install/check/test/build/
-audit suite plus binding, bundle, configuration, CI, and full-diff reviews.
-
-One thing still requiring evidence is whether the existing stale generated
-bindings and dependency-audit findings can be resolved within the accepted
-versions; neither can be called passing in advance.
+Accepted for PR review, not yet merged. Complete staged diff reviewed against
+Issue #7 and source context. Production routes, schema, bindings and dependency
+pins remain unchanged. Preserve default Vitest discovery, excluding only the
+Node scanner suite that npm test explicitly executes. Latest npm test passed
+21 Worker tests and 4 Node tests. Final scanner/canary reruns passed; no ignored
+or weakened tests, unexplained findings, unrelated changes or pending T002 human
+gate remain. The initial in-progress status above is historical. GitHub CI,
+current head/base review, merge verification and clean-main audit remain required.
