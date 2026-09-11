@@ -186,3 +186,36 @@ This update supersedes the earlier planning-only next-step text for task executi
   another routine approval pause, and do not start T004. Bootstrap/credential
   delivery remains a human decision if the migration actually requires fixing
   that behavior; do not add bootstrap routes/accounts/default credentials.
+
+## T003 current handoff — 2026-09-11 WITA
+
+This supersedes the earlier T002 next-step text. Stop after the verified T003
+merge; do not create or begin a T004 implementation task in this session.
+
+- Task: [Issue #8 / T003](https://github.com/Jordyee/CariDana.FILKOM/issues/8).
+  Implementation `1d5c75d`, base `c3b19c1`, branch
+  `codex/t003-identity-sessions`, [PR #49](https://github.com/Jordyee/CariDana.FILKOM/pull/49).
+  Final merge SHA/post-merge results will be recorded in the final PR audit.
+- Changed: `migrations/0001_identity_sessions.sql` and migration contract README;
+  `src/db/schema.ts`; `test/db/identity-migration.spec.ts`, test binding types and
+  Vitest configuration; T003 prompt, loop/action records and this handoff.
+- Evidence: 82 local D1 cases; 103 total Worker and four Node cases; clean install,
+  check/verify, dry-run build (ASSETS only), high-severity audit, 54-file clean
+  source/artifact/bundle scan and full staged diff/acceptance review passed.
+  PR is our own, non-draft and mergeable with no initial comments/reviews;
+  GitHub Verify is running and must pass on the final head before merge.
+- Remediation: explicit NUL rejection fixed SQLite GLOB's partial-text matching;
+  initial 80/82 became 82/82 without weakening tests.
+- Dependency state: T001/T002 merged. T003 locally evidenced; final reviewed merge
+  is pending at this record. T004 is next in implementation order after T003,
+  but is not started here. Subsequent migrations begin at 0002.
+- Storage: canonical lowercase ASCII username keys; five roles; explicit flags;
+  BLOB verifiers/token hashes; versioned JSON parameters; integer UTC epoch-ms
+  lifecycle bounds. The migration does not choose crypto costs/session TTL,
+  perform login, grant API permissions, or seed accounts/credentials.
+- Pending gates: first Coordinator bootstrap/one-time credential delivery before
+  implementing those behaviors; algorithm validation in T008 and full session
+  security in T009; remote D1 evidence in T037. Those are not completed by T003.
+  Four existing moderate advisories remain; pins are unchanged. SQL cannot prove
+  bytes are secure hashes or identify secrets hidden in arbitrary metadata.
+  T002 scanner limitations and T038 history/release gates remain in force.
