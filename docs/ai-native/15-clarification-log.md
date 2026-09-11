@@ -147,3 +147,22 @@ files with private aliases. `PRIVATE_SALES_TEMPLATE`, `PRIVATE_COMMITTEE_SOURCE`
 they are not usable external IDs and contain no secret mapping. Real targets
 must be supplied privately only at their explicitly authorized integration gate.
 Git-history privacy remains T038; T002 does not rewrite history or grant access.
+
+## T005 owner decision — 2026-09-11 WITA
+
+For the T005--T007 persistence boundary, the owner approved this P1 policy:
+
+- Confirmed order, state-history, and payment-proof reference metadata has no
+  automated deletion during P1; it remains available through activity closure
+  and reporting. A later retention/deletion policy requires an explicit owner
+  amendment and a separately versioned migration where data changes.
+- Payment and PIC-remittance histories are append-only per-order events with
+  non-negative integer-rupiah amounts. A new event never rewrites a prior
+  amount or changes another state axis.
+- Refunds, voids, and financial corrections are not represented as negative
+  T005 events. They require the approved correction/approval model in T006 and
+  leave original T005 history intact.
+
+This resolves the T005 persistence hard stop. It does not decide Member/PIC
+assignment scope, post-activation activity mutability, Sheet-link behavior, or
+any external-system gate.

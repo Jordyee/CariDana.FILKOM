@@ -198,7 +198,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name IN ('accounts', 'sessions')").all())
       .toMatchObject({ results: [] });
     expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual([
-      "0001_identity_sessions.sql", "0002_committee_activities.sql",
+      "0001_identity_sessions.sql", "0002_committee_activities.sql", "0003_orders_states.sql",
     ]);
     await applyD1Migrations(db, [env.TEST_MIGRATIONS[0]]);
     expect(await count(db, "accounts")).toBe(0);
@@ -209,7 +209,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
     const before = await schema(db);
     for (let retry = 0; retry < 2; retry++) await applyD1Migrations(db, env.TEST_MIGRATIONS);
     expect((await schema(db)).results).toEqual(before.results);
-    expect(await count(db, "d1_migrations")).toBe(2);
+    expect(await count(db, "d1_migrations")).toBe(3);
     expect(await count(db, "accounts")).toBe(1);
     expect(await count(db, "sessions")).toBe(1);
   });
@@ -236,7 +236,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
       "UPDATE sessions SET account_id = 'synthetic-orphan'",
     ] };
     await expect(applyD1Migrations(db, [brokenUpgrade])).rejects.toThrow(/FOREIGN KEY/);
-    expect(await count(db, "d1_migrations")).toBe(2);
+    expect(await count(db, "d1_migrations")).toBe(3);
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'synthetic_upgrade_probe'").first()).toBeNull();
     expect(await db.prepare("SELECT failure_count FROM accounts").first("failure_count")).toBe(0);
     expect(await count(db, "sessions")).toBe(1);

@@ -5,10 +5,11 @@ the first product migration; the backlog's `0002` filename was illustrative.
 Add subsequent migrations sequentially. Do not edit a published/applied product
 migration to change its meaning.
 
-T003/T004 have no production D1 binding or remote database identifier. `npm run verify`
+T003--T005 have no production D1 binding or remote database identifier. `npm run verify`
 runs the checked-in SQL through Cloudflare's `readD1Migrations` and
 `applyD1Migrations` helpers against disposable local D1 databases in Vitest.
-The focused command is `npx vitest run test/db/identity-migration.spec.ts`.
+Focused commands are `npx vitest run test/db/identity-migration.spec.ts` and
+`npx vitest run test/db/order-state-migration.spec.ts`.
 No manual remote migration or credential setup is needed for these tests.
 
 ## Identity storage contract
@@ -55,12 +56,36 @@ No manual remote migration or credential setup is needed for these tests.
 - Status and period indexes support activity setup/read models; division and
   partial active-member indexes support controlled attribution lookup.
 
+## Order and independent-state storage contract
+
+- `0003_orders_states.sql` follows the published T003/T004 migrations. An
+  `orders.order_id` is the immutable application primary key and its source is
+  only `manual` or `form_sync`. The order table intentionally has no Sheet
+  connection, row, or source-identity column; T007 owns that ledger.
+- An order carries buyer/attribution/mode data, assignment, payment method, and
+  optional Drive-reference metadata. It has no proof BLOB column. Campus orders
+  require a pickup point; regional orders require area, contact, and address;
+  both require an active PIC at creation/reassignment. Historical assignment
+  remains valid after a later PIC deactivation.
+- `order_state_history`, `payment_history`, `fulfillment_history`, and
+  `remittance_history` are independent append-only tables. Each has its own
+  constrained state, actor, UTC epoch timestamp, and latest-history index.
+  Payment/remittance rows retain non-negative integer-rupiah event amounts.
+- Confirmed order/state/proof-reference data is never deleted automatically in
+  P1. T006 owns approved refunds, voids, corrections, and their audit/approval
+  model; it must add a sequential migration rather than rewriting T005 history.
+- Query indexes support `orders(activity_id, order_id)`, assigned PIC lookup,
+  and independent latest state/actor retrieval. No financial aggregate or state
+  transition policy is encoded in this structural migration.
+
 ## Migration evidence boundary
 
 Tests cover the fresh/empty T001 product baseline, all role values, invalid raw
 SQL inserts/updates, foreign keys, uniqueness, strict numeric/flag types,
 lifecycle bounds, column inventories, indexes/query plans, two no-op replays,
 failed-DDL rollback and safe retry, failed upgrade preservation, and failed
-multi-statement mutation rollback. Deliberately broken migrations exist only
-inside disposable test cases and are never read as product migration files.
+multi-statement mutation rollback. T005 additionally covers cross-mode order
+constraints, append-only histories, no Sheet identity/proof binary column, and
+independent latest state/actor retrieval. Deliberately broken migrations exist
+only inside disposable test cases and are never read as product migration files.
 Remote D1 migration evidence remains a separate T037 gate.
