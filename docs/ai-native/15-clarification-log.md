@@ -196,3 +196,14 @@ The owner approved normal sessions with an 8-hour absolute lifetime and a
 The owner explicitly authorized continuation of T009 after reviewing the
 focused prompt. This resolves the lifetime hard stop, without authorizing
 deployment, real data, a production binding, or T010 implementation.
+
+## T009/T012 owner gate amendment — 2026-09-14 WITA
+
+The owner explicitly approved moving deployed same-origin cookie/CSRF judgment
+from T009 to the mandatory T012 deployed-authentication gate, so T009 may be
+accepted and merged after its reviewed local Worker/browser evidence and all
+PR checks pass. T012 must prove cookie flags/bounded expiry, missing/invalid/
+cross-session/cross-origin CSRF denial, logout and revocation through the full
+deployed same-origin login/session flow. Local evidence is not deployed proof.
+This changes gate ownership only: it waives no proof, grants no deployment or
+real-data authority, and does not start T010 or T012 in this task.

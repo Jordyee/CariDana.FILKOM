@@ -55,3 +55,12 @@ Review is recorded in 09-code-review.md and evidence in
 docs/evidence/t009-session-security.md. Deployed same-origin human judgment is
 still pending, so prepare a draft PR, retain Issue #14 open and do not merge or
 start T010. No deployment or real-data action occurred.
+
+## Owner resolution — 2026-09-14 WITA
+
+The owner approved moving deployed same-origin cookie/CSRF judgment to the
+mandatory T012 gate, allowing T009 acceptance/merge on reviewed local evidence.
+Updated source issues, prompt, review, clarification and handoff accordingly.
+The earlier pending-draft record describes the state before this decision.
+No runtime/schema/test/dependency changes were needed. Final amended-head CI
+and the PR merge checks must pass; T010 remains unstarted in this task.

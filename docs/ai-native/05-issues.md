@@ -444,8 +444,12 @@ expiry, and revocation for every protected route.
   middleware.
 
 **AI Can Help With:** Implement middleware, repositories, and security tests.
-**Student Must Judge:** Cookie/CSRF behavior in the deployed same-origin flow and
-whether the lifetime fits committee operations without weakening revocation.
+**Student Must Judge:** Whether the lifetime fits committee operations without
+weakening revocation. The owner approved 8-hour absolute / 15-minute idle normal
+sessions and 10-minute restricted sessions. On 2026-09-14 WITA, the owner moved
+deployed same-origin cookie/CSRF judgment to the mandatory T012 gate, permitting
+T009 acceptance/merge on the reviewed local Worker and browser evidence. This
+does not waive deployed proof or authorize deployment.
 **Risk Level:** High
 
 ## Issue 10: Implement login throttling, lockout, reset, and forced change
@@ -531,7 +535,7 @@ not broaden a role to make a feature easier.
 
 **Task ID:** T012
 **User Story:** US-001
-**Requirement IDs:** FR-003-FR-008, NFR-020, NFR-024, AC-001
+**Requirement IDs:** FR-003-FR-008, NFR-002-NFR-004, NFR-020, NFR-024, AC-001
 **Priority:** P1
 **Parallelizable:** No
 **Goal:** Validate the final authentication flow and hash parameters in an
@@ -548,6 +552,11 @@ isolated non-production Worker before protected feature work depends on them.
 - The deployed test records PBKDF2 CPU/wall timing, normal login latency,
   generic failure behavior, third-failure delay, fifth-failure lock, persistence,
   expiry, and admin unlock.
+- The owner reviews cookie/CSRF behavior through the complete deployed
+  same-origin login/session flow, including cookie flags and bounded expiry,
+  missing/invalid/cross-session/cross-origin CSRF denial, logout and revocation.
+  This proof moved from T009 by explicit owner approval on 2026-09-14 WITA;
+  local browser evidence cannot replace it.
 - Parameters stay within Cloudflare CPU/runtime constraints and the PRD's core
   interaction target, or the task reports the first failing limit.
 - Evidence contains no passwords, session tokens, secrets, or account-enumeration
@@ -561,6 +570,8 @@ isolated non-production Worker before protected feature work depends on them.
   not one favorable request.
 - Compare results with local Worker-runtime tests and inspect Cloudflare
   invocation metadata.
+- Run the synthetic browser cookie/CSRF scenarios against the explicitly
+  authorized isolated deployment and retain sanitized owner-review evidence.
 
 **AI Can Help With:** Build the synthetic benchmark harness and summarize
 sanitized timing evidence.

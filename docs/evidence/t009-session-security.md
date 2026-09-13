@@ -70,26 +70,26 @@ case. The final full command results are recorded in the action log and review.
 No test endpoint is registered in production; no real DB binding, account,
 credential, external integration or deployment was created.
 
-**Pending external/human evidence:** Issue #14 asks for judgment of cookie/CSRF
-behavior in the deployed same-origin flow. Loopback HTTPS is local evidence,
-not that deployed judgment. T009 is technically implemented but not fully
-accepted while this item is pending. Keep its PR draft; do not auto-merge or
-start T010. A later owner decision must resolve the deployment/review boundary.
-T012's deployed CPU policy is independently still required.
+**Owner gate amendment — 2026-09-14 WITA:** The owner explicitly moved deployed
+same-origin cookie/CSRF judgment to the mandatory T012 gate and approved T009
+acceptance/merge on the reviewed local evidence. Loopback HTTPS remains local
+evidence; the deployed proof is not waived or claimed. T012 now retains both
+CPU and deployed same-origin cookie/CSRF review before protected feature work.
+This grants no deployment or real-data authority. T010 is not started here.
 
 ## Compact handoff
 
 - Task/issue: T009 / #14; branch `codex/t009-session-security`.
-- Implementation commit: `a9a3480`; [draft PR #55](https://github.com/Jordyee/CariDana.FILKOM/pull/55)
+- Implementation commit: `a9a3480`; [PR #55](https://github.com/Jordyee/CariDana.FILKOM/pull/55)
   against approved main `8eb9d47`. The PR timeline identifies the final audit head.
 - Changes: session auth/repository/middleware/routes, sequential migration 0006,
   schema/redaction support, API and migration regressions, local browser harness,
   approved policy and prompt/loop/review/action evidence.
 - Verification: 197 Worker + four Node tests; type/bindings, dry-run build,
   high-severity audit, privacy scan, complete diff review and local Chromium pass.
-- Dependencies: T003/T008 merged. T010 remains unstarted and blocked by full T009
-  acceptance. No next issue is started or created from this task.
-- Pending owner gate: deployed same-origin cookie/CSRF judgment. Safest current
-  state is a reviewed draft with recoverable code. Owner may explicitly place
-  that proof in the T012 deployed-auth gate, or authorize a separately specified
-  isolated synthetic verification now. No such amendment/authorization is assumed.
+- Dependencies: T003/T008 merged. T010 is next after the T009 reviewed merge;
+  no next issue is started or created from this task.
+- Pending later gate: T012 deployed same-origin cookie/CSRF judgment and CPU
+  proof. The owner-approved reassignment is recorded in 15-clarification-log.md
+  and in T009/T012 of 05-issues.md. PR merge and post-merge evidence are recorded
+  in the GitHub timeline and final audit comment.

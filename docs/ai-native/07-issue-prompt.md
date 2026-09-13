@@ -92,10 +92,11 @@ Run `npm ci` if needed, focused auth/D1 tests, `npm run check`, `npm test`,
 `npm run verify` and fresh/upgrade/constraint/index/repeat/failure/rollback
 checks. Use the four-attempt policy without weakening tests.
 
-No UI change is planned. Same-origin browser cookie/CSRF judgment remains a
-required review item. Identify local evidence as local; deployed-flow judgment
-stays pending where deployment is not authorized. Do not claim completion or
-merge through an unresolved issue-owned human gate. T012 CPU evidence remains.
+No UI change is planned. On 2026-09-14 WITA the owner explicitly moved deployed
+same-origin cookie/CSRF judgment to the mandatory T012 gate, allowing T009
+acceptance/merge on reviewed local Worker/browser evidence. Identify local
+evidence as local; no deployed proof is claimed or waived and no deployment is
+authorized. T012 retains both its CPU and deployed cookie/CSRF evidence.
 
 ## Constraints / Do Not
 

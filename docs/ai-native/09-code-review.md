@@ -9,10 +9,11 @@ existing identity/schema and privacy tests; configured CI.
 
 ## Verdict
 
-**Technical review passes; full acceptance remains pending deployed same-origin
-human evidence.** Keep the PR draft. Do not merge, close Issue #14 or start T010
-while that required judgment remains unresolved. Lifetime policy is approved;
-no further bootstrap/delivery decision is needed.
+**Pass for T009 acceptance and the final PR merge gate.** On 2026-09-14 WITA,
+the owner explicitly moved deployed same-origin cookie/CSRF judgment to T012.
+Reviewed local evidence satisfies T009 under that amendment; deployed proof is
+still mandatory at T012 and is not claimed here. Lifetime and bootstrap/delivery
+decisions are already approved. T010 is not started in this task.
 
 ## Acceptance Mapping
 
@@ -24,7 +25,7 @@ no further bootstrap/delivery decision is needed.
 | CSRF acceptance | Per-session domain-separated HMAC verified through Web Crypto, exact Origin and Fetch Metadata checks; missing/invalid/cross-session/cross-origin denials pass |
 | NFR-003/004: privacy and generic errors | No-store generic responses, no raw exception logging, credential/token/cookie/header redaction, no raw token persistence; scanner passes |
 | Migration safety | 0006 only; fresh/upgrade/no-op/failed-DDL rollback, transaction rollback, strict metadata, indexes, one-way revocation; six focused tests pass |
-| Deployed same-origin judgment | Pending. Loopback Chromium is local evidence, not a deployed proof |
+| Deployed same-origin judgment | Mandatory at T012 by owner amendment; not a remaining T009 acceptance gate. Loopback Chromium remains local evidence |
 
 ## Findings and Resolutions
 
@@ -69,8 +70,9 @@ debug production endpoint or product permission grant was found.
 T009 has no configured deployed DB, login route, account administration UI or
 deployed browser proof. T010/T011/T012 own login/recovery, complete authorization
 and deployed CPU respectively. This PR does not satisfy those later issues.
-The requested deployed same-origin judgment needs a separate owner decision
-about when/how to conduct that authorized synthetic verification.
+The owner assigned deployed same-origin judgment to T012. That gate still needs
+an explicitly authorized isolated synthetic environment and owner review; this
+amendment authorizes no deployment or real-data access.
 
 ## Explanation and Loop Decision
 
@@ -81,5 +83,7 @@ existing sessions atomically. Idle use may advance last-seen time, never the
 absolute deadline or revocation state. A restricted session cannot gain normal
 access by having an account flag cleared.
 
-Accept the implementation for a draft PR and remote CI review. Keep overall
-T009 acceptance pending; provide the owner the concrete evidence and gate choice.
+Accept T009 under the approved gate amendment. Recheck the amended PR head,
+base, complete diff, CI and unresolved comments before marking ready/merging.
+The amendment changes documentation and gate ownership only; no runtime,
+dependency, schema or test changes follow the passing implementation evidence.
