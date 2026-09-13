@@ -1,4 +1,4 @@
-# Code Review Report — Issue #12 / T007
+# Code Review Report — T008
 
 ## Sources Read
 
@@ -6,53 +6,55 @@
 - `docs/ai-native/04-architecture.md`
 - `docs/ai-native/05-issues.md`
 - `docs/ai-native/08-loop-log.md`
-- `docs/ai-native/07-issue-prompt.md`
-- `AGENTS.md`
-- GitHub Issue #12 and the complete T007 working-tree diff
+- GitHub Issue #13
+- Complete T008 working diff and focused test/build evidence
 
 ## Verdict
 
-Pass for Task-ID commit, PR review, and CI verification.
+**Pass.** The implementation is limited to Worker-native auth-domain primitives
+and tests. It does not select a deployed PBKDF2 cost or implement any T009+
+route, session, bootstrap, credential-delivery, authorization, UI, migration,
+or external-system behavior.
 
 ## Matches the Issue?
 
-`0005_sync_reports.sql` is the verified next sequential migration after the
-published `0001`--`0004` product migrations; no earlier migration changes.
-It adds strict local-D1 storage for Sheet/tab metadata, final manual
-preview/commit run results, per-run source-row outcomes, reviewed manual-match
-decisions, unique committed source links, and report provenance. The change is
-persistence-only: it adds no API route, UI, Sheet/Drive client, credential,
-external operation, remote D1 action, report generator, or closure behavior.
+- `src/auth/password.ts` derives only PBKDF2-HMAC-SHA-256 with `crypto.subtle`,
+  a CSPRNG per-verifier salt, versioned parameter metadata, strict malformed
+  metadata rejection, and byte-wise comparison.
+- `verifyPassword` performs one derivation and one comparison for a supplied
+  verifier, a nonexistent account, or malformed metadata; the test injects a
+  counted deriver to prove this work shape.
+- A valid prior version returns `needsUpgrade: true`; no rehash write or login
+  route was added.
+- `issueTemporaryCredential` generates opaque random in-memory material,
+  creates only a verifier plus `oneTime` and `mustChangePassword` markers, and
+  documents that the material must not cross a DTO/log/durable boundary.
+- `redactCredentialLogValue` recursively redacts plaintext/credential/verifier/
+  salt and standalone or suffixed hash fields. The review added direct root-hash
+  coverage before accepting the change.
 
 ## Requirement Coverage
 
-| Requirement / story | Evidence in code | Status |
+| Requirement / story | Evidence in code and tests | Status |
 | --- | --- | --- |
-| US-004, FR-017--FR-018 | `sheet_connections` stores only Sheet/tab identity and mapping version; `sync_runs` snapshots preview/commit operation and mapping version; `sync_rows` stores no response payload. | Covered structurally |
-| US-004, FR-019--FR-023 | Raw SQL guards permit preview candidates/skips/failures and commit imports/links/skips/failures; row outcomes retain a reason; manual candidates require an explicit Coordinator/Deputy decision, actor, time, reason, and selected order. | Covered structurally |
-| US-004, NFR-010 | The unique `(sheet_connection_id, source_row_identity)` ledger can bind a committed source once only. Replay rows remain observable but cannot create another link. | Covered structurally |
-| US-011, FR-050--FR-052 | `report_versions` retains activity and closed-reference metadata, generator/template versions, checksum, creator, and timestamp without an artifact blob. | Covered structurally |
-| NFR-013, NFR-014 | Source identity and outcomes are append-only local evidence; SQL/type inventory excludes credentials, tokens, proof values, source payloads, and workbooks. | Covered structurally |
-| NFR-026 | Focused tests cover clean application, upgrade preservation, no-op replay, failed-DDL rollback/retry, strict/FK/check/index behavior, and legacy migration lifecycle expectations. | Covered |
+| US-001, FR-001, FR-003 | `createPasswordVerifier`, PBKDF2 Web Crypto derivation, account-row adapter, valid/invalid test | Covered for T008 primitive scope |
+| US-002, FR-007, FR-008 | Temporary-credential issuer supplies verifier and forced-change marker without a transport | Covered for T008 primitive scope |
+| NFR-003 | Internal-only types, no routes, recursive log redaction tests, privacy scan | Covered for T008 primitive scope |
+| NFR-004 | Single-derivation dummy-verifier path for nonexistent/malformed material | Covered for T008 primitive scope; generic HTTP response belongs to T010 |
+| AC-001 | Focused authentication primitive evidence | Partial by design; account lifecycle, sessions, lockout, and authorization remain T009--T012 |
 
 ## Matches the PRD and Architecture?
 
-Yes. The schema follows the architecture's `sheet_connections`, `sync_runs`,
-`sync_rows`, `sheet_order_links`, and `report_versions` boundaries. A `manual`
-order has no independent Sheet identity; it can become linked only through an
-explicit reviewed commit row. A `form_sync` order can be ledgered only as an
-import. The ledger is committed before future write-back behavior and prevents
-a partial failure/retry from creating another link. The report closed-reference
-is opaque metadata, so T023/T033 remain responsible for closure and workbook
-generation.
+Yes. The files use only Worker Web Crypto and preserve the architecture's
+PBKDF2-HMAC-SHA-256 candidate. The policy is caller-provided and versioned, so
+the future deployed CPU decision remains T012. D1 account fields are mapped
+internally without exposing a raw-row or response DTO.
 
 ## Unrelated Changes
 
-None found. The only pre-existing test changes update their expected full
-migration sequence/count from `0004` to `0005`; they are required to preserve
-the project's global migration upgrade/no-op/rollback regression coverage.
-All other paths are the T007 migration, internal types, contract notes,
-focused tests, required loop/review artifacts, and action ledger.
+No unrelated runtime behavior or dependency changed. The remaining modifications
+are required T008 prompt/loop/review/decision/audit artifacts and a schema
+comment that corrects the T003 field contract.
 
 ## Must Fix
 
@@ -60,39 +62,34 @@ None.
 
 ## Should Fix
 
-None within T007. T025/T028 must still authorize a sanitized external target
-and prove header mapping/three-pass behavior. T026--T027 own mapping, preview,
-commit transaction, write-back, and server-side route authorization. T023/T033
-own closed-activity validation, workbook generation, and download lifecycle.
+None within T008.
 
 ## Security / Privacy Notes
 
-- Only synthetic values appear in the new migration/tests; no external request
-  is made and no credential, real identifier, buyer payload, map/proof link, or
-  workbook is added.
-- Coordinator/Deputy checks are D1 integrity backstops for configuration,
-  manual-candidate review, sync run, and ledger resolution. They do not replace
-  the later server-side authorization and scope checks.
-- Result and review reason text must remain redacted/safe when T026--T027 write
-  it; this structural task intentionally stores no raw source-row payload from
-  which an unsafe reason could be reconstructed.
+- The temporary credential exists only in the internal issuance return value for
+  an external, owner-approved handoff. It must never be serialized; later
+  provisioning/reset services must consume it only to persist the verifier and
+  forced-change flag.
+- The constant-shape claim covers one KDF plus one comparison. Different
+  historic verifier costs can still have different CPU time, which is inherent
+  to versioned upgrades and must be bounded by T012's approved policy.
+- Final iteration/cost selection is deliberately absent; the review does not
+  treat local test iterations as production security evidence.
 
 ## Missing Verification
 
-The local schema boundary is covered. Still pending and not implied by this
-review: real/duplicate Sheet authorization and integration proof (T025--T028),
-private Drive review (T024), full route authorization/scope proof (T011/T017/
-T034), activity closure/report production (T023/T033), and remote D1 rehearsal
-(T037).
+Only later-task evidence remains: T009 sessions, T010 generic login responses
+and one-time consumption/forced-change lifecycle, T011 authorization, and T012
+deployed Worker CPU/lock proof. No migration or mobile check applies to T008.
 
 ## Student Explanation Check
 
-The owner should be able to explain why source identities are kept separately
-from source-row payloads, why a retry can record another outcome but not bind a
-second order, why an explicit manual review is required before a manual link,
-and why a report version retains a checksum/provenance rather than its workbook.
+The student should be able to explain why a salt and verifier are internal
+persistence material, why a dummy verifier makes an absent account execute the
+same KDF/comparison shape, why successful old-policy verification asks the
+caller to upgrade, and why the returned temporary credential cannot be an HTTP
+DTO or log field.
 
 ## Loop Decision
 
-Accept Cycle 1 for Task-ID commit, push, complete PR/CI review, and the merge
-gate.
+**Accept for the Task-ID commit, push, and complete PR/CI review.**
