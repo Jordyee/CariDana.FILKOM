@@ -294,3 +294,77 @@ export interface IdempotencyKeyRow {
   created_at: number;
   expires_at: number;
 }
+
+/** Safe Sheet/tab metadata only; credentials and source-row payloads are excluded. */
+export interface SheetConnectionRow {
+  id: string;
+  activity_id: string;
+  sheet_identity: string;
+  tab_identity: string;
+  mapping_version: string;
+  configured_by_account_id: string;
+  configured_at: number;
+}
+
+export type SyncRunOperation = "preview" | "commit";
+export type SyncRunResultStatus = "succeeded" | "partially_failed" | "failed";
+
+/** Immutable final result of one manual preview or commit run. */
+export interface SyncRunRow {
+  id: string;
+  sheet_connection_id: string;
+  operation: SyncRunOperation;
+  result_status: SyncRunResultStatus;
+  /** Mapping version copied from the connection at run time. */
+  mapping_version: string;
+  initiated_by_account_id: string;
+  started_at: number;
+  completed_at: number;
+}
+
+export type SyncRowOutcome = "candidate" | "imported" | "linked" | "skipped" | "failed";
+export type SyncReviewerDecision = "link_existing" | "import_separately";
+
+/** One safe, append-only source-row result. It intentionally has no response payload fields. */
+export interface SyncRowRow {
+  id: string;
+  sync_run_id: string;
+  sheet_connection_id: string;
+  source_row_identity: string;
+  outcome: SyncRowOutcome;
+  outcome_reason: string | null;
+  possible_manual_order_id: string | null;
+  reviewer_decision: SyncReviewerDecision | null;
+  reviewed_by_account_id: string | null;
+  reviewed_at: number | null;
+  review_reason: string | null;
+  selected_order_id: string | null;
+  recorded_at: number;
+}
+
+export type SheetOrderLinkResolution = "imported" | "linked";
+
+/** Committed source identity ledger; a retry cannot bind it to another order. */
+export interface SheetOrderLinkRow {
+  id: string;
+  activity_id: string;
+  sheet_connection_id: string;
+  source_row_identity: string;
+  order_id: string;
+  resolution: SheetOrderLinkResolution;
+  sync_row_id: string;
+  resolved_by_account_id: string;
+  resolved_at: number;
+}
+
+/** Deterministic report provenance only; D1 never retains a workbook or proof blob. */
+export interface ReportVersionRow {
+  id: string;
+  activity_id: string;
+  closed_activity_reference: string;
+  generator_version: string;
+  template_version: string;
+  checksum: string;
+  generated_by_account_id: string;
+  generated_at: number;
+}

@@ -118,3 +118,25 @@ constraints, append-only histories, no Sheet identity/proof binary column, and
 independent latest state/actor retrieval. Deliberately broken migrations exist
 only inside disposable test cases and are never read as product migration files.
 Remote D1 migration evidence remains a separate T037 gate.
+
+## Sheet-sync and report-version storage contract
+
+- `0005_sync_reports.sql` follows the published T003--T006 product migrations.
+  `sheet_connections` holds an activity-scoped Sheet/tab identity and mapping
+  version, but no credential, token, raw response row, or buyer/proof value.
+  Its physical identity is immutable; a later mapping-version update is copied
+  into each run so prior results remain interpretable.
+- `sync_runs` retains final preview/commit results. `sync_rows` is append-only
+  per-run source-identity evidence: preview can retain candidates/skips/failures;
+  commit can retain imports/links/skips/failures. A possible manual candidate
+  requires a Coordinator/Deputy reviewer, time, nonempty reason, and explicit
+  link-existing or import-separately decision before it can select an order.
+- `sheet_order_links` is the committed ledger. One Sheet connection/source-row
+  identity can bind exactly one order. Imported links require a same-activity
+  `form_sync` order; linked rows require the reviewed existing same-activity
+  `manual` order. Replayed rows may be recorded in later runs, but the ledger
+  rejects a second binding before a write-back retry can create another order.
+- `report_versions` retains activity/closed-reference, generator/template
+  versions, checksum, creator, and timestamp only. Closure enforcement and
+  workbook generation belong to later tasks; no workbook, proof, or binary
+  column exists here.
