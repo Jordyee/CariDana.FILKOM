@@ -166,3 +166,24 @@ For the T005--T007 persistence boundary, the owner approved this P1 policy:
 This resolves the T005 persistence hard stop. It does not decide Member/PIC
 assignment scope, post-activation activity mutability, Sheet-link behavior, or
 any external-system gate.
+
+## T008 owner decision — 2026-09-13 WITA
+
+The owner approved continuation of T008 with the following security boundary:
+
+- The first Coordinator is provisioned only through a one-time deployment
+  bootstrap secret. The future bootstrap path must be disabled or made unusable
+  after that account is created; it is not an application route, CLI, or T008
+  implementation surface.
+- A temporary credential is delivered outside the application through a
+  confidential channel approved by the owner. The application never implements
+  delivery, logs the credential, returns it through an HTTP DTO, or retains it
+  after the narrow in-memory handoff needed to provision its verifier.
+- T008 may define parameterized, versioned PBKDF2 primitives and synthetic-test
+  policies, but no final deployed production parameter policy is selected.
+  T012 remains responsible for deployed Worker CPU evidence and the final
+  production policy; valid login supports a later version upgrade.
+
+This resolves the T008 bootstrap and credential-delivery hard stop only. It
+does not authorize deployment, secrets, real accounts, a bootstrap endpoint,
+credential delivery, session/login/reset routes, or a final PBKDF2 cost.

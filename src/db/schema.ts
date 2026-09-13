@@ -11,7 +11,7 @@ export interface AccountRow {
   password_hash: number[];
   password_salt: number[];
   password_version: number;
-  /** Nonempty JSON object; interpretation and approved costs belong to T008. */
+  /** Versioned PBKDF2 parameter metadata; this remains internal, never a DTO. */
   password_parameters: string;
   active: DatabaseFlag;
   must_change_password: DatabaseFlag;
