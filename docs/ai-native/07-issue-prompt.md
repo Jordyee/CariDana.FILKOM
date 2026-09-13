@@ -8,99 +8,113 @@
 - `docs/ai-native/05-issues.md`
 - `docs/ai-native/14-project-constitution.md`
 - `docs/ai-native/15-clarification-log.md`
-- `docs/ai-native/17-agent-action-log.md`
-- `package.json`
-- GitHub Issue #10 (`T005`)
+- GitHub Issue #11 (`T006`)
 
-You are working on Issue #10 / T005: Add order and independent-state migrations.
+You are working on Issue #11 / T006: Add audit, correction, approval, and
+idempotency migrations.
 
 ## Goal
 
-Add only the next sequential D1 migration after published `0001` and `0002`
-for immutable order IDs, constrained source type, mode-specific order data, and
-separate order/payment/fulfillment/remittance state histories. The migration
-must not collapse those axes into one status or store proof binaries.
+Add only the next sequential D1 migration after published `0001`--`0003` for
+append-oriented issue, correction, approval, audit, and idempotency persistence.
+The schema must retain proposed/approved correction evidence and repeat-request
+outcomes without rewriting or deleting confirmed T005 history.
 
 ## Relevant Context
 
-- FR-019 and SC-002 require one immutable, unique internal Order ID and an
-  explicit `manual` or `form_sync` source type. A manual order has no Sheet row
-  identity; T007 owns the Sheet-link ledger.
-- FR-024--FR-029 require separate histories, actor/time, mode-specific data,
-  integer rupiah amounts, and no cross-axis update inference. FR-032 permits
-  Drive-reference metadata only, never binary proof content.
-- Campus records may use pickup point/PIC without regional delivery fields;
-  regional records require area, contact/address, and PIC. Existing T004
-  activity configuration is the authoritative mode boundary.
-- The clarification log explicitly requires an owner decision before T005--T007
-  on retention and on payment/refund/remittance semantics that affect
-  persistence. This is a hard stop, not an implementation detail.
+- FR-038--FR-042 and SC-008 require explicit issues/losses, Member/PIC issue
+  proposals, Coordinator/Deputy-only approval of voids, refunds, financial
+  corrections, and final loss classifications, plus preserved ID, before/after,
+  actor, timestamp, and reason for every confirmed-record correction.
+- NFR-005 requires audit events for financial approvals. NFR-010 requires
+  duplicate-prone financial mutations to be idempotent. NFR-012 requires D1
+  constraints that reject invalid persistence states.
+- The owner-approved T005 policy is binding: confirmed order, state-history,
+  payment-proof-reference metadata, payment history, and remittance history
+  receive no automated P1 deletion. Payment/remittance events are append-only,
+  non-negative integer rupiah. Refunds, voids, and financial corrections are
+  approved T006 effects, not negative T005 events or rewritten prior history.
+- Architecture requires append-only audit events; correction/approval records
+  retain target type/ID, proposed/resolved values, reason, actor/time, and
+  approver/time. Idempotency binds account, route, key, request hash, result
+  reference, and expiry.
 
 ## Files to Inspect First
 
 - `migrations/0001_identity_sessions.sql`
 - `migrations/0002_committee_activities.sql`
+- `migrations/0003_orders_states.sql`
 - `migrations/README.md`
 - `src/db/schema.ts`
 - `test/db/identity-migration.spec.ts`
-- `test/db/activity-migration.spec.ts`
+- `test/db/order-state-migration.spec.ts`
 - `test/env.d.ts` and `vitest.config.ts`
 
 ## Constraints
 
-- The next migration must be sequential (expected `0003_orders_states.sql`);
-  never modify published `0001` or `0002`.
-- Use strict local D1/SQLite tables, foreign keys, `CHECK` constraints, and
-  indexes that support activity/order ID, assigned PIC, and state retrieval.
-- Use synthetic test data and disposable local Miniflare D1 only. Keep runtime
-  Wrangler bindings ASSETS-only.
-- Preserve T002 privacy guardrails: no real buyer data, proof/map links,
-  credentials, external IDs, remote D1, Sheet access, Drive access, or binary/
-  BLOB proof column.
-- Migration tests must cover fresh schema, upgrade from T004, repeat/no-op,
-  failed disposable migration rollback/retry, raw invalid insert/update,
-  constrained source/state/money types, cross-mode invalid records, and
-  independent latest-state/actor retrieval.
+- Add one unpublished sequential migration, expected
+  `migrations/0004_audit_corrections_idempotency.sql`; never edit published
+  migrations.
+- Use strict local D1/SQLite tables, foreign keys, `CHECK` constraints,
+  append-only guards, and audit/idempotency lookup indexes. All timestamps are
+  bounded UTC epoch milliseconds and all money is integer rupiah.
+- Preserve target type/ID, before/after JSON objects, nonempty reason,
+  proposer/time, and approval identity/time whenever approval is required.
+  Void, refund, financial-correction, and final-loss proposals require approval;
+  a nonfinancial typo/proof correction does not gain a financial effect merely
+  through its persistence row.
+- Model approval/resolution combinations so a raw insert or update cannot be
+  both pending and resolved, cannot be rejected with an approved effect, and
+  cannot apply an approval-required financial effect before approval.
+- Store audit intent rather than passwords, password verifiers/salts, session
+  token/digest values, buyer fields, or proof reference values. The audit
+  before/after representation must be structured, nonempty, and intelligible
+  without copying unnecessary sensitive fields.
+- Bind idempotency uniqueness to account ID, route, client key, and request
+  hash/stored result. Same key plus a different hash must be representable as a
+  collision to reject, never a second stored result. A stored result is a safe
+  internal status/reference, never a raw response containing personal data.
+- Only explicitly labelled disposable drafts may be hard-deleted. No foreign
+  key cascade, update, or delete path may silently remove confirmed order,
+  payment, remittance, correction, approval, or audit history.
 
 ## Do Not
 
-- Do not implement routes, authorization, UI, Sheet synchronization/link
-  ledger, Drive integration, idempotency service, corrections, refunds,
-  approval workflow, reconciliation calculations, remote migration, or
-  deployment.
-- Do not invent a retention/deletion rule, payment/refund representation, or
-  remittance aggregation/settlement rule. Do not start T006 or later work.
+- Do not add routes, authorization services, UI, financial calculations,
+  correction workflow behavior, manual-order creation, Sheet/Drive integration,
+  weak-network drafts, external resources, remote migration, or deployment.
+- Do not represent refunds, voids, or corrections as negative payment/remittance
+  rows; do not decide retention beyond the approved no-automatic-P1-deletion
+  policy; do not implement T007 or later work.
+- Do not store raw credentials, tokens, buyer contacts/addresses, map links,
+  payment-proof links/files, or proof binaries in the new audit/idempotency
+  schema, fixtures, logs, or documentation.
 
-## Approved Persistence Policy
+## Expected Output
 
-The owner approved no automated P1 deletion of confirmed order, state-history,
-or proof-reference metadata; it remains through closure/reporting. Payment and
-PIC-remittance rows are append-only per-order non-negative integer-rupiah
-events. Refunds, voids, and financial corrections remain approved T006 effects,
-not negative or rewriting T005 events. A later retention change requires an
-explicit owner amendment and a sequential migration.
-
-## Expected Output After Approval
-
-- One new order/state migration, internal D1 row types, updated migration
-  contract notes, and a focused local migration suite.
-- Constraint/index/history tests mapping every T005 acceptance criterion,
-  including proof-column inventory and independent state retrieval.
+- One sequential audit/correction/approval/idempotency migration, internal D1
+  row types, migration contract notes, and a focused disposable-local D1 suite.
+- Tests for fresh/upgrade/repeat/no-op/failed-migration rollback and retry;
+  raw invalid inserts/updates; append-only/no-delete behavior; mandatory
+  correction/audit fields; approval/resolution contradictions; and same-key
+  same-request versus same-key different-request idempotency collisions.
 
 ## Verification
 
-Run focused migration tests, then `npm ci`, `npm run check`, `npm test`,
+Run focused T006 migration tests, then `npm ci`, `npm run check`, `npm test`,
 `npm run verify`, `npm run build`, `npm audit --audit-level=high`,
-`npm run scan:sensitive`, and `git diff --check`. Review the entire diff.
+`npm run scan:sensitive`, and `git diff --check`. Inspect a synthetic correction
+and prove every mandatory audit field stays queryable. Review the complete diff.
 
 ## Loop Handoff
 
-Use `run-the-loop` with the changed files, review findings, and test evidence.
-The approved policy above is binding for the build cycle.
+After the build attempt, use `run-the-loop` with the changed files, review
+findings, and test evidence. The owner-approved persistence policy above is
+binding for every loop cycle.
 
 ## Before You Finish
 
-- Summarize changed files and approved persistence assumptions.
-- Explain how constraints preserve each independent state axis.
-- Report verification evidence, no-proof-binary inspection, and remaining
-  human gates.
+- Summarize changed files and the approval/retention assumptions.
+- Explain how the schema prevents contradictory approval/resolution states and
+  idempotency-key request substitution.
+- Report verification evidence, redaction inspection, and remaining human gates.

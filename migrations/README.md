@@ -5,11 +5,12 @@ the first product migration; the backlog's `0002` filename was illustrative.
 Add subsequent migrations sequentially. Do not edit a published/applied product
 migration to change its meaning.
 
-T003--T005 have no production D1 binding or remote database identifier. `npm run verify`
+T003--T006 have no production D1 binding or remote database identifier. `npm run verify`
 runs the checked-in SQL through Cloudflare's `readD1Migrations` and
 `applyD1Migrations` helpers against disposable local D1 databases in Vitest.
 Focused commands are `npx vitest run test/db/identity-migration.spec.ts` and
-`npx vitest run test/db/order-state-migration.spec.ts`.
+`npx vitest run test/db/order-state-migration.spec.ts` and
+`npx vitest run test/db/audit-migration.spec.ts`.
 No manual remote migration or credential setup is needed for these tests.
 
 ## Identity storage contract
@@ -77,6 +78,34 @@ No manual remote migration or credential setup is needed for these tests.
 - Query indexes support `orders(activity_id, order_id)`, assigned PIC lookup,
   and independent latest state/actor retrieval. No financial aggregate or state
   transition policy is encoded in this structural migration.
+
+## Audit, correction, approval, and idempotency storage contract
+
+- `0004_audit_corrections_idempotency.sql` follows the published T003--T005
+  migrations. `issues` and `corrections` retain a target type/ID, nonempty
+  reason, reporter/proposer, timestamp, and correction before/after JSON
+  objects. A correction must name the same existing target as its issue.
+- `void`, `refund`, `financial_correction`, and `loss_classification` require
+  approval. Their non-negative rupiah `financial_effect_proposals` are separate
+  from T005 payment/remittance histories; only one immutable Coordinator/Deputy
+  approval or rejection can resolve a proposed effect. An approval cannot exist
+  without the matching effect proposal and immutable matching audit event, and
+  an effect cannot use a different correction kind. The T022 service will
+  create the proposal, decision, audit, and actual operational correction
+  transactionally.
+- `audit_events` are append-only actor/action/entity metadata with optional
+  redacted JSON summaries. Required before/after data is held by the correction
+  itself, so a generic audit event need not duplicate buyer, proof, credential,
+  or session material. Snapshot keys associated with these sensitive categories
+  are rejected at the D1 boundary.
+- `idempotency_keys` scopes one request hash and safe status/reference to an
+  account, API route, and client key. The same key with another hash is rejected;
+  repeated same-hash requests find the existing stored reference. Raw request
+  bodies and response payloads are never persisted.
+- All T006 rows are append-only. This migration creates no D1 draft record or
+  deletion route: T040 owns optional local drafts. Confirmed T005 and T006
+  history has no cascade or silent-delete path; future retention changes require
+  a new owner-approved migration.
 
 ## Migration evidence boundary
 
