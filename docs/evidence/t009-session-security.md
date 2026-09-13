@@ -76,3 +76,20 @@ not that deployed judgment. T009 is technically implemented but not fully
 accepted while this item is pending. Keep its PR draft; do not auto-merge or
 start T010. A later owner decision must resolve the deployment/review boundary.
 T012's deployed CPU policy is independently still required.
+
+## Compact handoff
+
+- Task/issue: T009 / #14; branch `codex/t009-session-security`.
+- Implementation commit: `a9a3480`; [draft PR #55](https://github.com/Jordyee/CariDana.FILKOM/pull/55)
+  against approved main `8eb9d47`. The PR timeline identifies the final audit head.
+- Changes: session auth/repository/middleware/routes, sequential migration 0006,
+  schema/redaction support, API and migration regressions, local browser harness,
+  approved policy and prompt/loop/review/action evidence.
+- Verification: 197 Worker + four Node tests; type/bindings, dry-run build,
+  high-severity audit, privacy scan, complete diff review and local Chromium pass.
+- Dependencies: T003/T008 merged. T010 remains unstarted and blocked by full T009
+  acceptance. No next issue is started or created from this task.
+- Pending owner gate: deployed same-origin cookie/CSRF judgment. Safest current
+  state is a reviewed draft with recoverable code. Owner may explicitly place
+  that proof in the T012 deployed-auth gate, or authorize a separately specified
+  isolated synthetic verification now. No such amendment/authorization is assumed.
