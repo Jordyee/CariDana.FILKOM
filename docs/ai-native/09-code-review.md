@@ -1,102 +1,98 @@
-# Code Review Report — Issue #11 / T006
+# Code Review Report — Issue #12 / T007
 
 ## Sources Read
 
-- `AGENTS.md`
 - `docs/ai-native/03-prd.md`
 - `docs/ai-native/04-architecture.md`
 - `docs/ai-native/05-issues.md`
 - `docs/ai-native/08-loop-log.md`
-- `docs/ai-native/14-project-constitution.md`
-- `docs/ai-native/15-clarification-log.md`
-- GitHub Issue #11 and the complete T006 working-tree diff
+- `docs/ai-native/07-issue-prompt.md`
+- `AGENTS.md`
+- GitHub Issue #12 and the complete T007 working-tree diff
 
 ## Verdict
 
-Pass for final local verification and PR review.
+Pass for Task-ID commit, PR review, and CI verification.
 
 ## Matches the Issue?
 
-`0004_audit_corrections_idempotency.sql` is the next sequential migration and
-does not alter published `0001`--`0003`. It adds strict, append-only records
-for issue reports, correction proposals, financial-effect proposals, decisions,
-minimal audit events, and idempotency outcomes. The schema is intentionally
-persistence-only: it does not add a route, UI, calculation, external system, or
-remote D1 operation.
+`0005_sync_reports.sql` is the verified next sequential migration after the
+published `0001`--`0004` product migrations; no earlier migration changes.
+It adds strict local-D1 storage for Sheet/tab metadata, final manual
+preview/commit run results, per-run source-row outcomes, reviewed manual-match
+decisions, unique committed source links, and report provenance. The change is
+persistence-only: it adds no API route, UI, Sheet/Drive client, credential,
+external operation, remote D1 action, report generator, or closure behavior.
 
 ## Requirement Coverage
 
 | Requirement / story | Evidence in code | Status |
 | --- | --- | --- |
-| FR-038, US-008 | Non-negative `financial_effect_proposals` are separate from T005 payment/remittance history and become countable only alongside one approved decision. | Covered structurally |
-| FR-039, US-009 | `issues` preserves issue type, target, reporter/time, and reason for every supported issue category. | Covered structurally |
-| FR-040, NFR-005 | Financial correction kinds require exactly one Coordinator/Deputy approval/rejection after a matching effect proposal; every decision must reference a matching immutable audit event. | Covered structurally |
-| FR-041, SC-008 | `corrections` retains target, JSON before/after values, reason, proposer/time, and approval reference; target and timestamp consistency are guarded. | Covered structurally |
-| FR-042 | T006 tables reject update/delete; no cascade path is introduced for confirmed T005/T006 history. No draft table or deletion route is added. | Covered structurally |
-| NFR-010 | `idempotency_keys` has a composite account/route/key primary key, digest, safe result status/reference, expiry, and a same-key/different-digest rejection trigger. | Covered structurally |
-| NFR-012 | `STRICT`, FK, enum, JSON, timestamp, amount, linkage, chronology, append-only, and index tests exercise raw invalid inserts/updates. | Covered structurally |
+| US-004, FR-017--FR-018 | `sheet_connections` stores only Sheet/tab identity and mapping version; `sync_runs` snapshots preview/commit operation and mapping version; `sync_rows` stores no response payload. | Covered structurally |
+| US-004, FR-019--FR-023 | Raw SQL guards permit preview candidates/skips/failures and commit imports/links/skips/failures; row outcomes retain a reason; manual candidates require an explicit Coordinator/Deputy decision, actor, time, reason, and selected order. | Covered structurally |
+| US-004, NFR-010 | The unique `(sheet_connection_id, source_row_identity)` ledger can bind a committed source once only. Replay rows remain observable but cannot create another link. | Covered structurally |
+| US-011, FR-050--FR-052 | `report_versions` retains activity and closed-reference metadata, generator/template versions, checksum, creator, and timestamp without an artifact blob. | Covered structurally |
+| NFR-013, NFR-014 | Source identity and outcomes are append-only local evidence; SQL/type inventory excludes credentials, tokens, proof values, source payloads, and workbooks. | Covered structurally |
+| NFR-026 | Focused tests cover clean application, upgrade preservation, no-op replay, failed-DDL rollback/retry, strict/FK/check/index behavior, and legacy migration lifecycle expectations. | Covered |
 
 ## Matches the PRD and Architecture?
 
-Yes. The owner-approved T005 policy remains intact: refunds, voids, and
-financial corrections are non-negative T006 proposals and never mutate or
-delete a payment/remittance event. Pending is represented by the absence of a
-decision; a unique immutable `approved` or `rejected` decision prevents a
-contradictory double-resolution. Corrections retain necessary before/after
-evidence, while generic audit events use a redacted summary and reject sensitive
-snapshot-key categories.
+Yes. The schema follows the architecture's `sheet_connections`, `sync_runs`,
+`sync_rows`, `sheet_order_links`, and `report_versions` boundaries. A `manual`
+order has no independent Sheet identity; it can become linked only through an
+explicit reviewed commit row. A `form_sync` order can be ledgered only as an
+import. The ledger is committed before future write-back behavior and prevents
+a partial failure/retry from creating another link. The report closed-reference
+is opaque metadata, so T023/T033 remain responsible for closure and workbook
+generation.
 
 ## Unrelated Changes
 
-None found. The diff is limited to one sequential migration, internal row
-types, migration contract documentation, lifecycle expectation updates, focused
-local-D1 tests, the required prompt/loop/review artifacts, and the append-only
-action log. There are no dependency, route, client, runtime-binding,
-external-integration, or published-migration changes.
+None found. The only pre-existing test changes update their expected full
+migration sequence/count from `0004` to `0005`; they are required to preserve
+the project's global migration upgrade/no-op/rollback regression coverage.
+All other paths are the T007 migration, internal types, contract notes,
+focused tests, required loop/review artifacts, and action ledger.
 
 ## Must Fix
 
-None. Review initially found missing chronological guards and no enforced
-approval-to-audit linkage; both are now implemented and covered by raw-write
-tests.
+None.
 
 ## Should Fix
 
-None in T006 scope. T022 must create correction/effect/decision/audit rows in a
-single transaction and apply role/assignment authorization at the server
-boundary; T021 owns calculation of approved effects. Those later responsibilities
-are not claimed as complete here.
+None within T007. T025/T028 must still authorize a sanitized external target
+and prove header mapping/three-pass behavior. T026--T027 own mapping, preview,
+commit transaction, write-back, and server-side route authorization. T023/T033
+own closed-activity validation, workbook generation, and download lifecycle.
 
 ## Security / Privacy Notes
 
-- Audit rows contain actor, entity, action, optional redacted JSON, and no
-  dedicated password, session, token, buyer, contact, address, map, or proof
-  column. The D1 trigger rejects these sensitive snapshot-key categories.
-- Idempotency persists a nonempty digest and safe result reference only—never a
-  raw request or response body.
-- Tests use visibly synthetic identities and no external request, D1 resource,
-  Sheet, Drive, proof reference, credential, or financial source value.
-- The approval-role trigger is a schema integrity backstop, not a replacement
-  for T011/T017/T022 server-side authorization and scope checks.
+- Only synthetic values appear in the new migration/tests; no external request
+  is made and no credential, real identifier, buyer payload, map/proof link, or
+  workbook is added.
+- Coordinator/Deputy checks are D1 integrity backstops for configuration,
+  manual-candidate review, sync run, and ledger resolution. They do not replace
+  the later server-side authorization and scope checks.
+- Result and review reason text must remain redacted/safe when T026--T027 write
+  it; this structural task intentionally stores no raw source-row payload from
+  which an unsafe reason could be reconstructed.
 
 ## Missing Verification
 
-The T006-local migration boundary is covered. Deferred gates are remote
-migration rehearsal (T037), role/scope API denials and Member/PIC assignments
-(T011/T017), correction workflow/transaction rollback and timeline UI (T022),
-financial read-model calculations (T021), Sheet/Drive gates (T007/T024--T028),
-and closure/report behavior. They remain unpassed rather than implied by this
-schema review.
+The local schema boundary is covered. Still pending and not implied by this
+review: real/duplicate Sheet authorization and integration proof (T025--T028),
+private Drive review (T024), full route authorization/scope proof (T011/T017/
+T034), activity closure/report production (T023/T033), and remote D1 rehearsal
+(T037).
 
 ## Student Explanation Check
 
-The owner should be able to explain why an unapproved refund is only a proposal,
-why a financial decision needs an audit event but a Member/PIC cannot make it,
-why original payment/remittance rows are never negated or rewritten, and how a
-stored request digest blocks idempotency-key substitution while allowing a retry
-to find the original safe result reference.
+The owner should be able to explain why source identities are kept separately
+from source-row payloads, why a retry can record another outcome but not bind a
+second order, why an explicit manual review is required before a manual link,
+and why a report version retains a checksum/provenance rather than its workbook.
 
 ## Loop Decision
 
-Accept Cycle 1 for final complete verification, Task-ID commit/push, and the
-reviewed PR merge gate.
+Accept Cycle 1 for Task-ID commit, push, complete PR/CI review, and the merge
+gate.

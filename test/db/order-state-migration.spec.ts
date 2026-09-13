@@ -265,13 +265,13 @@ describe("T005 migration lifecycle on separate disposable D1 databases", () => {
     const db = env.TEST_UPGRADE_DB;
     expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual([
       "0001_identity_sessions.sql", "0002_committee_activities.sql", "0003_orders_states.sql",
-      "0004_audit_corrections_idempotency.sql",
+      "0004_audit_corrections_idempotency.sql", "0005_sync_reports.sql",
     ]);
     await applyD1Migrations(db, env.TEST_MIGRATIONS.slice(0, 2));
     const context = await createOrderContext(db, "campus");
     expect(await count(db, "activities")).toBe(1);
     await applyD1Migrations(db, env.TEST_MIGRATIONS);
-    expect(await count(db, "d1_migrations")).toBe(4);
+    expect(await count(db, "d1_migrations")).toBe(5);
     expect(await count(db, "orders")).toBe(0);
     expect(await db.prepare("SELECT id FROM accounts WHERE id = ?").bind(context.account.id).first("id")).toBe(context.account.id);
     const before = await db.prepare("SELECT type, name, sql FROM sqlite_schema WHERE name NOT LIKE 'sqlite_%' ORDER BY name").all();
@@ -289,7 +289,7 @@ describe("T005 migration lifecycle on separate disposable D1 databases", () => {
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'orders'").first()).toBeNull();
     expect(await count(db, "d1_migrations")).toBe(2);
     await applyD1Migrations(db, env.TEST_MIGRATIONS);
-    expect(await count(db, "d1_migrations")).toBe(4);
+    expect(await count(db, "d1_migrations")).toBe(5);
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'remittance_history'").first("name")).toBe("remittance_history");
   });
 });
