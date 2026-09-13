@@ -140,3 +140,28 @@ Remote D1 migration evidence remains a separate T037 gate.
   versions, checksum, creator, and timestamp only. Closure enforcement and
   workbook generation belong to later tasks; no workbook, proof, or binary
   column exists here.
+
+## T009 session security contract
+
+- `0006_session_security.sql` adds `accounts.session_version` and the strict,
+  one-to-one `session_security` table. Legacy sessions remain stored but cannot
+  authenticate without valid metadata; no session or account is seeded.
+- The owner approved normal sessions with an 8-hour absolute lifetime and
+  15-minute idle timeout, plus 10-minute restricted sessions. The migration
+  enforces the issuance duration and immutable restricted status. Conditional
+  repository updates and SQL guards prevent idle revival or lifetime extension.
+- Account credential/active/forced-change transitions increment the generation
+  and revoke sessions inside the same transaction. Explicit invalidation also
+  increments it. Counter-only updates do not invalidate sessions. A failed
+  batch rolls back the account, generation and revocation together.
+- `SessionService.issue` requires the generation from the account snapshot whose
+  password was successfully verified. T010 must not reread a new generation and
+  attach it to an old verification result. A password-policy upgrade also
+  changes the generation; T010 must account for that committed transition.
+- Revocation cannot be cleared; secured identity, token hash, timestamps and
+  privilege kind cannot be rewritten. All auth reads join current account state.
+  Queries use the existing unique token-hash and account indexes, plus the new
+  metadata primary-key index. No remote migration or product DB binding is added.
+- Future business mutations must check their current authorization and session
+  predicates in the same transaction as their effects. Middleware authenticates
+  the request; it is not a transaction lock for later business operations.

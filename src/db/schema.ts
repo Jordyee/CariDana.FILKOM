@@ -31,6 +31,18 @@ export interface SessionRow {
   revoked_at: number | null;
 }
 
+/** T009 account snapshot: keep this generation with the credential being verified. */
+export interface SessionAccountRow extends AccountRow {
+  session_version: number;
+}
+
+export interface SessionSecurityRow {
+  session_id: string;
+  account_version: number;
+  restricted: DatabaseFlag;
+  last_seen_at: number;
+}
+
 /** Controlled attribution data; no member row is a login account. */
 export interface DivisionRow {
   id: string;
