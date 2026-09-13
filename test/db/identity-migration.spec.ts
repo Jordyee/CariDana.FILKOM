@@ -107,7 +107,8 @@ describe("T003 identity/session schema", () => {
     expect(await env.TEST_DB.prepare("SELECT typeof(token_hash) AS hash FROM sessions").first()).toEqual({ hash: "blob" });
     const accountColumns = await env.TEST_DB.prepare("PRAGMA table_info(accounts)").all<{ name: string }>();
     const sessionColumns = await env.TEST_DB.prepare("PRAGMA table_info(sessions)").all<{ name: string }>();
-    expect(accountColumns.results.map((column) => column.name)).toEqual(Object.keys(account));
+    // T009 adds a non-secret revocation generation, preserving all T003 columns.
+    expect(accountColumns.results.map((column) => column.name)).toEqual([...Object.keys(account), "session_version"]);
     expect(sessionColumns.results.map((column) => column.name)).toEqual(Object.keys(session));
     // Verify D1's decoded representation without logging any verifier bytes.
     const stored = await env.TEST_DB.prepare("SELECT * FROM accounts").first<AccountRow>();
@@ -199,7 +200,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
       .toMatchObject({ results: [] });
     expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual([
       "0001_identity_sessions.sql", "0002_committee_activities.sql", "0003_orders_states.sql",
-      "0004_audit_corrections_idempotency.sql", "0005_sync_reports.sql",
+      "0004_audit_corrections_idempotency.sql", "0005_sync_reports.sql", "0006_session_security.sql",
     ]);
     await applyD1Migrations(db, [env.TEST_MIGRATIONS[0]]);
     expect(await count(db, "accounts")).toBe(0);
@@ -210,7 +211,7 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
     const before = await schema(db);
     for (let retry = 0; retry < 2; retry++) await applyD1Migrations(db, env.TEST_MIGRATIONS);
     expect((await schema(db)).results).toEqual(before.results);
-    expect(await count(db, "d1_migrations")).toBe(5);
+    expect(await count(db, "d1_migrations")).toBe(6);
     expect(await count(db, "accounts")).toBe(1);
     expect(await count(db, "sessions")).toBe(1);
   });
@@ -237,14 +238,14 @@ describe("T003 migration lifecycle on separate disposable D1 databases", () => {
       "UPDATE sessions SET account_id = 'synthetic-orphan'",
     ] };
     await expect(applyD1Migrations(db, [brokenUpgrade])).rejects.toThrow(/FOREIGN KEY/);
-    expect(await count(db, "d1_migrations")).toBe(5);
+    expect(await count(db, "d1_migrations")).toBe(6);
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'synthetic_upgrade_probe'").first()).toBeNull();
     expect(await db.prepare("SELECT failure_count FROM accounts").first("failure_count")).toBe(0);
     expect(await count(db, "sessions")).toBe(1);
     await expect(db.batch([
       db.prepare("UPDATE accounts SET active = 0"),
       db.prepare("UPDATE sessions SET revoked_at = -1"),
-    ])).rejects.toThrow(/CHECK/);
+    ])).rejects.toThrow(/CHECK|session lifecycle constraint/);
     expect(await db.prepare("SELECT active FROM accounts").first("active")).toBe(1);
   });
 });

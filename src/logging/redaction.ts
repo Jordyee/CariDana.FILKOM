@@ -15,7 +15,7 @@ export function redactCredentialLogValue(value: unknown): unknown {
 }
 
 function isSensitiveCredentialField(key: string): boolean {
-  return /password|credential|verifier|salt|(?:^|_)hash(?:$|_)/i.test(key);
+  return /password|credential|verifier|salt|token|cookie|authorization|csrf|(?:^|_)hash(?:$|_)/i.test(key);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

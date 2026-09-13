@@ -338,12 +338,12 @@ describe("T007 migration lifecycle on separate disposable D1 databases", () => {
     const db = env.TEST_UPGRADE_DB;
     expect(env.TEST_MIGRATIONS.map((migration) => migration.name)).toEqual([
       "0001_identity_sessions.sql", "0002_committee_activities.sql", "0003_orders_states.sql",
-      "0004_audit_corrections_idempotency.sql", "0005_sync_reports.sql",
+      "0004_audit_corrections_idempotency.sql", "0005_sync_reports.sql", "0006_session_security.sql",
     ]);
     await applyD1Migrations(db, env.TEST_MIGRATIONS.slice(0, 4));
     const context = await createOrderContext(db);
     await applyD1Migrations(db, env.TEST_MIGRATIONS);
-    expect(await count(db, "d1_migrations")).toBe(5);
+    expect(await count(db, "d1_migrations")).toBe(6);
     expect(await count(db, "sheet_connections")).toBe(0);
     expect(await count(db, "report_versions")).toBe(0);
     expect(await db.prepare("SELECT order_id FROM orders WHERE order_id = ?").bind(context.manual.order_id).first("order_id"))
@@ -363,7 +363,7 @@ describe("T007 migration lifecycle on separate disposable D1 databases", () => {
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'sheet_connections'").first()).toBeNull();
     expect(await count(db, "d1_migrations")).toBe(4);
     await applyD1Migrations(db, env.TEST_MIGRATIONS);
-    expect(await count(db, "d1_migrations")).toBe(5);
+    expect(await count(db, "d1_migrations")).toBe(6);
     expect(await db.prepare("SELECT name FROM sqlite_schema WHERE name = 'report_versions'").first("name"))
       .toBe("report_versions");
   });

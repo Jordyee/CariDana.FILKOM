@@ -12,7 +12,9 @@ describe("CariDana.FILKOM Worker foundation", () => {
     "does not expose the retired spike route %s",
     async (path) => {
       const response = await SELF.fetch(`https://example.test${path}`);
-      expect(response.status).toBe(404);
+      // T009 now denies every unauthenticated API request before route lookup.
+      expect(response.status).toBe(401);
+      expect(await response.json()).toEqual({ error: "Autentikasi diperlukan." });
     },
   );
 });
